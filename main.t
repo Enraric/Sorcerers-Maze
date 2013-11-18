@@ -8,7 +8,6 @@
 
 View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
 
-
 var * keys : array char of boolean
 const * UP := chr (119)
 const * DOWN := chr (115)
@@ -17,18 +16,13 @@ const * RIGHT := chr (100)
 const * SPACE := chr (32)
 var text := Font.New ("Serif:14")
 
-
-
-
 class wizard
     export update, draw
-    
     
     var x, y : int := 100
     var health, mana : real := 50.0
     var hasKey : boolean
     var speed : int := 3
-    
     
     proc heal
         if mana > 0 then
@@ -39,7 +33,6 @@ class wizard
             health := 100
         end if
     end heal
-    
     
     proc update
         if mana <= 100 then
@@ -58,7 +51,6 @@ class wizard
             heal
         end if
     end update
-    
     
     proc draw
         Draw.FillOval (x, y, 20, 20, red)
