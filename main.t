@@ -5,7 +5,9 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
+
 
 const * UP := chr (119)
 const * DOWN := chr (115)
@@ -14,6 +16,9 @@ const * RIGHT := chr (100)
 const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
+
+
+
 
 class * item
     export initialize, use, draw
@@ -31,13 +36,57 @@ class * item
     end draw
 end item
 
+
+
+
+class goblin
+    export update, draw
+    
+    
+    var x, y : int := 300
+    var health : real := 1.0
+    var speed : int := 3
+    var randmove : int := Rand.Int (0, 4)
+    var step : int := 0
+    
+    
+    proc update
+        step += 1
+        if step = 50 then
+            randmove := Rand.Int(1,4)
+            step := 0
+        end if
+        if randmove = (1) then
+            y += speed
+        elsif randmove = (2) then
+            y -= speed
+        elsif randmove = (3) then
+            x -= speed
+        elsif randmove = (4) then
+            x += speed
+        end if
+    end update
+    
+    
+    proc draw
+        Draw.FillOval (x, y, 20, 20, red)
+    end draw
+    
+    
+end goblin
+
+
+
+
 class wizard
     export update, draw
     
+    
     var x, y : int := 100
     var health, mana : real := 50.0
+    var hasKey : boolean
     var speed : int := 3
-    var items : array 1..6 of ^item
+    
     
     proc heal
         if mana > 0 then
@@ -49,8 +98,9 @@ class wizard
         end if
     end heal
     
+    
     proc update
-        if mana <= 100 then
+        if mana < 100 then
             mana += 0.05
         end if
         if keys (UP) then
@@ -67,26 +117,39 @@ class wizard
         end if
     end update
     
+    
     proc draw
         Draw.FillOval (x, y, 20, 20, red)
-                    Draw.FillBox (0, maxy-60, maxx, maxy, black)
-        Font.Draw ("Health", 210, maxy-25, text, white)
-        Font.Draw ("Mana", 210, maxy-50, text, white)
+        
         for i : 0 .. 3
             Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
+        end for
+            
+        for i : 0 .. 3
             Draw.FillBox (0, maxy-60, round (mana * 2), maxy - 41 - i * 5, 32 + i)
         end for
     end draw
     
+    
 end wizard
 
+
+
+var g : ^goblin
+new g
 var w : ^wizard
 new w
 loop
+    Draw.FillBox (0, maxy-60, maxx, maxy, black)
+    Font.Draw ("Health", 210, maxy-25, text, white)
+    Font.Draw ("Mana", 210, maxy-50, text, white)
     Input.KeyDown (keys)
     w -> update
     w -> draw
+    g -> update
+    g -> draw
     View.Update
     cls
     Time.DelaySinceLast (16)
 end loop
+
