@@ -5,18 +5,17 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
 
-var * keys : array char of boolean
 const * UP := chr (119)
 const * DOWN := chr (115)
 const * LEFT := chr (97)
 const * RIGHT := chr (100)
 const * SPACE := chr (32)
+var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 
-class item
+class * item
     export initialize, use, draw
     
     var pic : int
@@ -26,10 +25,9 @@ class item
     end initialize
     
     deferred proc use
-    deferred proc draw
-    
-    body proc draw
-        
+
+    proc draw(i : int)
+        %Pic.Draw(48 * i + 50)
     end draw
 end item
 
@@ -39,6 +37,7 @@ class wizard
     var x, y : int := 100
     var health, mana : real := 50.0
     var speed : int := 3
+    var items : array 1..6 of ^item
     
     proc heal
         if mana > 0 then
