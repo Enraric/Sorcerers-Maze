@@ -17,13 +17,18 @@ const * SPACE := chr (32)
 var * text := Font.New ("Serif:14")
 
 class item
-    export use, draw
+    export initialize, use, draw
+    
+    var pic : int
+    
+    proc initialize(p : int)
+        
+    end initialize
     
     deferred proc use
     deferred proc draw
     
     body proc draw
-        
         
     end draw
 end item
