@@ -91,9 +91,9 @@ end wizard
 class goblin
     export update, draw
     
-    var x, y : real := 300
+    var x, y : int := 300
     var health : real := 1.0
-    var speed : real := 2.5
+    var speed : int := 2
     var randmove : int := Rand.Int (0, 4)
     var step : int := 0
     
@@ -118,9 +118,9 @@ class goblin
         elsif x < ^p.x-5 then 
             x += speed
         else
-            if y > ^p.y then
+            if y > ^p.y+5 then
                 y -= speed
-            else
+            elsif y < ^p.y-5 then
                 y += speed
             end if
         end if
@@ -128,7 +128,7 @@ class goblin
     
     
     proc draw
-        Draw.FillOval (x div 1, y div 1, 20, 20, purple)
+        Draw.FillOval (x, y, 20, 20, purple)
     end draw
     
 end goblin
