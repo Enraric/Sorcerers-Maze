@@ -18,8 +18,6 @@ var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 
 
-
-
 class * item
     export initialize, use, draw
     
@@ -36,50 +34,8 @@ class * item
     end draw
 end item
 
-
-
-
-class goblin
-    export update, draw
-    
-    
-    var x, y : int := 300
-    var health : real := 1.0
-    var speed : int := 3
-    var randmove : int := Rand.Int (0, 4)
-    var step : int := 0
-    
-    
-    proc update
-        step += 1
-        if step = 50 then
-            randmove := Rand.Int(1,4)
-            step := 0
-        end if
-        if randmove = (1) then
-            y += speed
-        elsif randmove = (2) then
-            y -= speed
-        elsif randmove = (3) then
-            x -= speed
-        elsif randmove = (4) then
-            x += speed
-        end if
-    end update
-    
-    
-    proc draw
-        Draw.FillOval (x, y, 20, 20, red)
-    end draw
-    
-    
-end goblin
-
-
-
-
-class wizard
-    export update, draw
+class * wizard
+    export update, draw, x, y
     
     
     var x, y : int := 100
@@ -130,10 +86,52 @@ class wizard
         end for
     end draw
     
-    
 end wizard
 
-
+class goblin
+    export update, draw
+    
+    var x, y : real := 300
+    var health : real := 1.0
+    var speed : real := 2.5
+    var randmove : int := Rand.Int (0, 4)
+    var step : int := 0
+    
+    proc update(p : ^wizard)
+    /*
+        step += 1
+        if step = 50 then
+            randmove := Rand.Int(1,4)
+            step := 0
+        end if
+        if randmove = (1) then
+            y += speed
+        elsif randmove = (2) then
+            y -= speed
+        elsif randmove = (3) then
+            x -= speed
+        elsif randmove = (4) then
+            x += speed
+        end if*/
+        if x > ^p.x+5 then
+            x -= speed
+        elsif x < ^p.x-5 then 
+            x += speed
+        else
+            if y > ^p.y then
+                y -= speed
+            else
+                y += speed
+            end if
+        end if
+    end update
+    
+    
+    proc draw
+        Draw.FillOval (x div 1, y div 1, 20, 20, purple)
+    end draw
+    
+end goblin
 
 var g : ^goblin
 new g
@@ -146,7 +144,7 @@ loop
     Input.KeyDown (keys)
     w -> update
     w -> draw
-    g -> update
+    g -> update(w)
     g -> draw
     View.Update
     cls
