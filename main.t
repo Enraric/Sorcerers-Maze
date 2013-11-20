@@ -29,23 +29,38 @@ class * item
     end initialize
     
     deferred proc use
-
+    
     proc draw(i : int)
         %Pic.Draw(48 * i + 50)
     end draw
 end item
 
+class _moveable
+    export draw, setXY, x, y
+    var x, y : int
+    var health : real
+    var speed : int
+    
+    deferred proc draw
+    
+    proc setXY(nx, ny : int)
+        x := nx
+        y := ny
+    end setXY
+end _moveable
+
 %Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class _wizard
-    export update, draw, x, y
+    inherit _moveable
+    export update
     
-    
-    var x, y : int := 100
-    var health, mana : real := 50.0
-    var hasKey : boolean
-    var speed : int := 3
-    
+    %setXY(100, 100)
+    x := 100
+    y := 100
+    speed := 3
+    health := 50.0
+    var mana := 50.0
     
     proc heal
         if mana > 0 then
@@ -77,7 +92,7 @@ class _wizard
     end update
     
     
-    proc draw
+    body proc draw
         Draw.FillOval (x, y, 20, 20, red)
         
         for i : 0 .. 3
@@ -95,46 +110,49 @@ type wizard : ^_wizard
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class _goblin
-    export update, draw
+    inherit _moveable
+    export update
     
-    var x, y : real := 300
-    var health : real := 1.0
-    var speed : real := 2.5
-    var randmove : int := Rand.Int (0, 4)
-    var step : int := 0
+    %setXY(300, 300)
+    x := 300
+    y := 300
+    health := 1.0
+    speed := 2
+    var randmove := Rand.Int (0, 4)
+    var step := 0
     
     proc update(p : wizard)
-    /*
+        /*
         step += 1
         if step = 50 then
-            randmove := Rand.Int(1,4)
-            step := 0
+        randmove := Rand.Int(1,4)
+        step := 0
         end if
         if randmove = (1) then
-            y += speed
-        elsif randmove = (2) then
-            y -= speed
-        elsif randmove = (3) then
-            x -= speed
-        elsif randmove = (4) then
-            x += speed
+        y += speed
+    elsif randmove = (2) then
+        y -= speed
+    elsif randmove = (3) then
+        x -= speed
+    elsif randmove = (4) then
+        x += speed
         end if*/
         if x > ^p.x+5 then
             x -= speed
         elsif x < ^p.x-5 then 
             x += speed
         else
-            if y > ^p.y then
+            if y > ^p.y+5 then
                 y -= speed
-            else
+            elsif y < ^p.y-5 then
                 y += speed
             end if
         end if
     end update
     
     
-    proc draw
-        Draw.FillOval (x div 1, y div 1, 20, 20, purple)
+    body proc draw
+        Draw.FillOval (x, y, 20, 20, purple)
     end draw
     
 end _goblin
