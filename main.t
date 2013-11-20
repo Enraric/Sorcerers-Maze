@@ -14,6 +14,8 @@ const * RIGHT := chr (100)
 const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
+type * wizard : forward
+type * goblin : forward
 
 %Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -35,7 +37,7 @@ end item
 
 %Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * wizard
+class _wizard
     export update, draw, x, y
     
     
@@ -87,11 +89,12 @@ class * wizard
         end for
     end draw
     
-end wizard
+end _wizard
+type wizard : ^_wizard
 
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class goblin
+class _goblin
     export update, draw
     
     var x, y : real := 300
@@ -100,7 +103,7 @@ class goblin
     var randmove : int := Rand.Int (0, 4)
     var step : int := 0
     
-    proc update(p : ^wizard)
+    proc update(p : wizard)
     /*
         step += 1
         if step = 50 then
@@ -134,14 +137,15 @@ class goblin
         Draw.FillOval (x div 1, y div 1, 20, 20, purple)
     end draw
     
-end goblin
+end _goblin
+type goblin : ^_goblin
 
 %Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
-var g : ^goblin
+var g : goblin
 new g
-var w : ^wizard
+var w : wizard
 new w
 loop
     Draw.FillBox (0, maxy-60, maxx, maxy, black)
