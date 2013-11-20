@@ -5,9 +5,7 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
-
+%Variable Declaration%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const * UP := chr (119)
 const * DOWN := chr (115)
@@ -17,6 +15,7 @@ const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 
+%Item Class%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * item
     export initialize, use, draw
@@ -33,6 +32,8 @@ class * item
         %Pic.Draw(48 * i + 50)
     end draw
 end item
+
+%Wizard Class%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * wizard
     export update, draw, x, y
@@ -88,12 +89,14 @@ class * wizard
     
 end wizard
 
+% Goblin Class%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class goblin
     export update, draw
     
-    var x, y : int := 300
+    var x, y : real := 300
     var health : real := 1.0
-    var speed : int := 2
+    var speed : real := 2.5
     var randmove : int := Rand.Int (0, 4)
     var step : int := 0
     
@@ -118,9 +121,9 @@ class goblin
         elsif x < ^p.x-5 then 
             x += speed
         else
-            if y > ^p.y+5 then
+            if y > ^p.y then
                 y -= speed
-            elsif y < ^p.y-5 then
+            else
                 y += speed
             end if
         end if
@@ -128,11 +131,14 @@ class goblin
     
     
     proc draw
-        Draw.FillOval (x, y, 20, 20, purple)
+        Draw.FillOval (x div 1, y div 1, 20, 20, purple)
     end draw
     
 end goblin
 
+%Main Program%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
 var g : ^goblin
 new g
 var w : ^wizard
@@ -150,4 +156,3 @@ loop
     cls
     Time.DelaySinceLast (16)
 end loop
-
