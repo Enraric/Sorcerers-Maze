@@ -86,7 +86,7 @@ class _wizard
     end heal
     
     body proc collide
-        health -= 5
+        health -= 1
     end collide
     
     proc update
@@ -135,7 +135,7 @@ class _goblin
     x := 300
     y := 300
     health := 1.0
-    speed := 0
+    speed := 2
     var randmove := Rand.Int (0, 4)
     var step := 0
     
