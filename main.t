@@ -14,7 +14,7 @@ const * RIGHT := chr (100)
 const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
-var * lose := boolean
+var * lose : boolean := false
 var * title := Font.New ("Serif:48:Bold")
 type * wizard : forward
 type * goblin : forward
@@ -25,7 +25,7 @@ type * moveable : forward
 proc gameover
     cls
     drawfillbox (0, 0, 1000, 1000, black)
-    Font.Draw ("Game Over", 200, 250, title, white)
+    Font.Draw ("Game Over", 250, 300, title, white)
 end gameover
 
 %Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -208,6 +208,7 @@ loop
     cls
     if lose = true then
         gameover
+        exit
     end if
     Time.DelaySinceLast (16)
 end loop
