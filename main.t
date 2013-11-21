@@ -86,7 +86,7 @@ class _wizard
     end heal
     
     body proc collide
-        health -= 1
+        health -= 0.75
     end collide
     
     proc update
@@ -105,9 +105,8 @@ class _wizard
         if keys (SPACE) then
             heal
         end if
-        if health <= 0 then
-            lose := true
-        end if
+        lose := health <= 0
+
     end update
     
     body proc draw
