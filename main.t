@@ -106,7 +106,7 @@ class _wizard
             heal
         end if
         if health <= 0 then
-            lose
+            lose := true
         end if
     end update
     
