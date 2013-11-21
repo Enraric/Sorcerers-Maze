@@ -18,6 +18,14 @@ type * wizard : forward
 type * goblin : forward
 type * moveable : forward
 
+%Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc gameover
+    cls
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("Game Over", 200, 250, title, white)
+end gameover
+
 %Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * item
@@ -94,6 +102,9 @@ class _wizard
         end if
         if keys (SPACE) then
             heal
+        end if
+        if health <= 0 then
+            lose
         end if
     end update
     
@@ -193,5 +204,8 @@ loop
     checkColl(w, g)
     View.Update
     cls
+    if lose = true then
+        gameover
+    end if
     Time.DelaySinceLast (16)
 end loop
