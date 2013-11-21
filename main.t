@@ -73,6 +73,19 @@ class _wizard
     end heal
     
     
+    /*
+    proc collision %(temporary)
+        if (x wizard) + 20 > (x goblin) - 20 and (x wizard) - 20 < (x goblin) + 20 then
+            health -= 0.5
+            damage = true
+        end if
+        if (y wizard) + 20 > (y goblin) - 20 and (y wizard) - 20 < (y goblin) + 20 and damage = false then
+            health -= 0.5
+        end if
+    end collision
+    */
+
+    
     proc update
         if mana < 100 then
             mana += 0.05
