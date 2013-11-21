@@ -16,6 +16,7 @@ var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 type * wizard : forward
 type * goblin : forward
+type * moveable : forward
 
 %Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -36,18 +37,20 @@ class * item
 end item
 
 class _moveable
-    export draw, setXY, x, y
+    export draw, collide, setXY, x, y
     var x, y : int
     var health : real
     var speed : int
     
     deferred proc draw
+    deferred proc collide(m : ^_moveable)
     
     proc setXY(nx, ny : int)
         x := nx
         y := ny
     end setXY
 end _moveable
+type * moveable : ^_moveable
 
 %Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -72,19 +75,9 @@ class _wizard
         end if
     end heal
     
-    
-    /*
-    proc collision %(temporary)
-        if (x wizard) + 20 > (x goblin) - 20 and (x wizard) - 20 < (x goblin) + 20 then
-            health -= 0.5
-            damage = true
-        end if
-        if (y wizard) + 20 > (y goblin) - 20 and (y wizard) - 20 < (y goblin) + 20 and damage = false then
-            health -= 0.5
-        end if
-    end collision
-    */
-
+    body proc collide
+        health -= 5
+    end collide
     
     proc update
         if mana < 100 then
@@ -104,7 +97,6 @@ class _wizard
         end if
     end update
     
-    
     body proc draw
         Draw.FillOval (x, y, 20, 20, red)
         
@@ -118,7 +110,7 @@ class _wizard
     end draw
     
 end _wizard
-type wizard : ^_wizard
+type * wizard : ^_wizard
 
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -130,7 +122,7 @@ class _goblin
     x := 300
     y := 300
     health := 1.0
-    speed := 2
+    speed := 0
     var randmove := Rand.Int (0, 4)
     var step := 0
     
@@ -163,13 +155,24 @@ class _goblin
         end if
     end update
     
+    body proc collide
+        
+    end collide
     
     body proc draw
         Draw.FillOval (x, y, 20, 20, purple)
     end draw
     
 end _goblin
-type goblin : ^_goblin
+type * goblin : ^_goblin
+
+proc checkColl(m1, m2 : moveable)
+    if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
+        ^m1.collide(m2)
+        ^m2.collide(m1)
+    end if
+end checkColl
+
 
 %Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -187,6 +190,7 @@ loop
     w -> draw
     g -> update(w)
     g -> draw
+    checkColl(w, g)
     View.Update
     cls
     Time.DelaySinceLast (16)
