@@ -14,6 +14,8 @@ const * RIGHT := chr (100)
 const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
+var * lose := boolean
+var * title := Font.New ("Serif:48:Bold")
 type * wizard : forward
 type * goblin : forward
 type * moveable : forward
