@@ -7,7 +7,6 @@
 
 % Variable Declaration
 
-
 const * UP := chr (119)
 const * DOWN := chr (115)
 const * LEFT := chr (97)
@@ -25,8 +24,8 @@ proc gameover
     cls
     drawfillbox (0, 0, 1000, 1000, black)
     Font.Draw ("Game Over", 250, 300, title, white)
+    View.Update
 end gameover
-
 
 % The parent class for all types of items
 class * item
@@ -35,7 +34,6 @@ class * item
     var pic : int
     
     proc initialize(p : int)
-        
     end initialize
     
     deferred proc use
@@ -109,12 +107,16 @@ class * wizard
             heal
         end if
         lose := health <= 0
-
+        
     end update
     
     body proc draw
         Draw.FillOval (x, y, 20, 20, red)
         
+            Draw.FillBox (0, maxy-60, maxx, maxy, black)
+
+        Font.Draw ("Health", 210, maxy-25, text, white)
+        Font.Draw ("Mana", 210, maxy-50, text, white)
         for i : 0 .. 3
             Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
         end for
@@ -181,9 +183,6 @@ var w : ^wizard
 new w
 ^g.t := w
 loop
-    Draw.FillBox (0, maxy-60, maxx, maxy, black)
-    Font.Draw ("Health", 210, maxy-25, text, white)
-    Font.Draw ("Mana", 210, maxy-50, text, white)
     Input.KeyDown (keys)
     w -> update
     w -> draw
@@ -192,9 +191,7 @@ loop
     checkColl(w, g)
     View.Update
     cls
-    if lose then
-        gameover
-        exit
-    end if
     Time.DelaySinceLast (16)
+    exit when lose
 end loop
+gameover
