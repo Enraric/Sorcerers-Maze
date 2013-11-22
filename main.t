@@ -176,7 +176,7 @@ end checkColl
 
 %Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
+View.Set ("graphics:800;580,offscreenonly,nobuttonbar")
 var g : ^goblin
 new g
 var w : ^wizard
