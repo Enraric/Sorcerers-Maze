@@ -5,7 +5,7 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-include "Graphics/pictures.t"
+include "pictures.t"
 
 % Variable Declaration
 
@@ -76,6 +76,7 @@ class * wizard
     health := 50.0
     var mana := 50.0
     var items : flexible array 1..0 of ^item
+    Sprite.Show(wizIdle)
     
     proc heal
 	if mana > 0 then
@@ -113,7 +114,7 @@ class * wizard
     end update
     
     body proc draw
-	Sprite.SetPosition(ws, x, y, true)
+	Sprite.SetPosition(wizIdle, x, y, true)
 	Draw.FillBox (0, maxy-60, maxx, maxy, black)
 	Font.Draw ("Health", 210, maxy-25, text, white)
 	Font.Draw ("Mana", 210, maxy-50, text, white)
