@@ -192,7 +192,7 @@ loop
     checkColl(w, g)
     View.Update
     cls
-    if lose = true then
+    if lose then
         gameover
         exit
     end if
