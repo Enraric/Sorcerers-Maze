@@ -5,7 +5,8 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Variable Declaration
+
 
 const * UP := chr (119)
 const * DOWN := chr (115)
@@ -16,11 +17,9 @@ var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 var * lose : boolean := false
 var * title := Font.New ("Serif:48:Bold")
-type * wizard : forward
-type * goblin : forward
-type * moveable : forward
+type * mode : enum(friend, enemy, neutral)
 
-%Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gameover
     cls
@@ -28,8 +27,8 @@ proc gameover
     Font.Draw ("Game Over", 250, 300, title, white)
 end gameover
 
-%Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% The parent class for all types of items
 class * item
     export initialize, use, draw
     
@@ -46,29 +45,31 @@ class * item
     end draw
 end item
 
-class _moveable
-    export draw, collide, setXY, x, y
+% The parent class for all things on-screen that move
+class moveable
+    export update, draw, collide, setXY, x, y, kind, damage
+    var kind : mode
     var x, y : int
     var health : real
     var speed : int
+    var damage : real
     
+    deferred proc update
     deferred proc draw
-    deferred proc collide(m : ^_moveable)
+    deferred proc collide(m : ^moveable)
     
     proc setXY(nx, ny : int)
         x := nx
         y := ny
     end setXY
-end _moveable
-type * moveable : ^_moveable
+end moveable
 
 %Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class _wizard
-    inherit _moveable
-    export update
+class * wizard
+    inherit moveable
     
-    %setXY(100, 100)
+    kind := mode.friend
     x := 100
     y := 100
     speed := 3
@@ -85,11 +86,13 @@ class _wizard
         end if
     end heal
     
-    body proc collide
-        health -= 0.75
+    body proc collide(m : ^moveable)
+        if ^m.kind = mode.enemy then
+            health -= ^m.damage
+        end if
     end collide
     
-    proc update
+    body proc update
         if mana < 100 then
             mana += 0.05
         end if
@@ -121,78 +124,62 @@ class _wizard
         end for
     end draw
     
-end _wizard
-type * wizard : ^_wizard
+end wizard
 
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class _goblin
-    inherit _moveable
-    export update
+class * goblin
+    inherit moveable
+    export var t
     
-    %setXY(300, 300)
+    kind := mode.enemy
     x := 300
     y := 300
     health := 1.0
     speed := 2
+    damage := 0.75
     var randmove := Rand.Int (0, 4)
     var step := 0
+    var t : ^moveable
     
-    proc update(p : wizard)
-        /*
-        step += 1
-        if step = 50 then
-        randmove := Rand.Int(1,4)
-        step := 0
-        end if
-        if randmove = (1) then
-        y += speed
-    elsif randmove = (2) then
-        y -= speed
-    elsif randmove = (3) then
-        x -= speed
-    elsif randmove = (4) then
-        x += speed
-        end if*/
-        if x > ^p.x+5 then
+    body proc update
+        if x > ^t.x+5 then
             x -= speed
-        elsif x < ^p.x-5 then 
+        elsif x < ^t.x-5 then 
             x += speed
         else
-            if y > ^p.y+5 then
+            if y > ^t.y+5 then
                 y -= speed
-            elsif y < ^p.y-5 then
+            elsif y < ^t.y-5 then
                 y += speed
             end if
         end if
     end update
     
     body proc collide
-        
     end collide
     
     body proc draw
         Draw.FillOval (x, y, 20, 20, purple)
     end draw
-    
-end _goblin
-type * goblin : ^_goblin
+end goblin
 
-proc checkColl(m1, m2 : moveable)
+% Procedure to check for collisions between two moveable objects
+proc checkColl(m1, m2 : ^moveable)
     if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
         ^m1.collide(m2)
         ^m2.collide(m1)
     end if
 end checkColl
 
-
 %Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
-var g : goblin
+var g : ^goblin
 new g
-var w : wizard
+var w : ^wizard
 new w
+^g.t := w
 loop
     Draw.FillBox (0, maxy-60, maxx, maxy, black)
     Font.Draw ("Health", 210, maxy-25, text, white)
@@ -200,7 +187,7 @@ loop
     Input.KeyDown (keys)
     w -> update
     w -> draw
-    g -> update(w)
+    g -> update
     g -> draw
     checkColl(w, g)
     View.Update
