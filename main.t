@@ -6,10 +6,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 include "pictures.t"
-var ww := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizIdle := Sprite.New(ww)
-var gg := Pic.FileNew("Graphics/superdoor_open.bmp")
-var * gobIdle := Sprite.New(gg)
+var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
+var * wizMove : array 1..4 of array 1..2 of int
+var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
+var * gobMove : array 1..4 of array 1..2 of int
 
 % Variable Declaration
 
@@ -45,7 +45,7 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-	%Pic.Draw(48 * i + 50)
+        %Pic.Draw(48 * i + 50)
     end draw
 end item
 
@@ -54,6 +54,7 @@ class moveable
     import Sprite
     export update, draw, collide, setXY, x, y, kind, damage
     var kind : mode
+    var pic : int
     var x, y : int
     var health : real
     var speed : int
@@ -64,8 +65,8 @@ class moveable
     deferred proc collide(m : ^moveable)
     
     proc setXY(nx, ny : int)
-	x := nx
-	y := ny
+        x := nx
+        y := ny
     end setXY
 end moveable
 
@@ -77,61 +78,63 @@ class * wizard
     kind := mode.friend
     x := 100
     y := 100
+    pic := wizIdle
     speed := 3
     health := 50.0
     var mana := 50.0
     var items : flexible array 1..0 of ^item
-    Sprite.Show(wizIdle)
     
     proc heal
-	if mana > 0 then
-	    mana -= 1
-	    health += 1
-	end if
-	if health > 100 then
-	    health := 100
-	end if
+        if mana > 0 then
+            mana -= 1
+            health += 1
+        end if
+        if health > 100 then
+            health := 100
+        end if
     end heal
     
     body proc collide(m : ^moveable)
-	if ^m.kind = mode.enemy then
-	    health -= ^m.damage
-	end if
+        if ^m.kind = mode.enemy then
+            health -= ^m.damage
+        end if
     end collide
     
     body proc update
-	if mana < 100 then
-	    mana += 0.05
-	end if
-	if keys (UP) then
-	    y += speed
-	elsif keys (DOWN) then
-	    y -= speed
-	elsif keys (LEFT) then
-	    x -= speed
-	elsif keys (RIGHT) then
-	    x += speed
-	end if
-	if keys (SPACE) then
-	    heal
-	end if
-	lose := health <= 0
+        if mana < 100 then
+            mana += 0.05
+        end if
+        if keys (UP) then
+            y += speed
+        elsif keys (DOWN) then
+            y -= speed
+        elsif keys (LEFT) then
+            x -= speed
+        elsif keys (RIGHT) then
+            x += speed
+        else
+            pic := wizIdle
+        end if
+        if keys (SPACE) then
+            heal
+        end if
+        lose := health <= 0
     end update
     
     body proc draw
-	Sprite.SetPosition(wizIdle, x, y, true)
-	Draw.FillBox (0, maxy-60, maxx, maxy, black)
-	Font.Draw ("Health", 210, maxy-25, text, white)
-	Font.Draw ("Mana", 210, maxy-50, text, white)
-	for i : 0 .. 3
-	    Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
-	end for
-	for i : 0 .. 3
-	    Draw.FillBox (0, maxy-60, round (mana * 2), maxy - 41 - i * 5, 32 + i)
-	end for
-	for i : 1..upper(items)
-	    items(i) -> draw(i)
-	end for
+        Pic.Draw(pic, x-20, y-20, picCopy)
+        Draw.FillBox (0, maxy-60, maxx, maxy, black)
+        Font.Draw ("Health", 210, maxy-25, text, white)
+        Font.Draw ("Mana", 210, maxy-50, text, white)
+        for i : 0 .. 3
+            Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
+        end for
+            for i : 0 .. 3
+            Draw.FillBox (0, maxy-60, round (mana * 2), maxy - 41 - i * 5, 32 + i)
+        end for
+            for i : 1..upper(items)
+            items(i) -> draw(i)
+        end for
     end draw
     
 end wizard
@@ -151,35 +154,34 @@ class * goblin
     var randmove := Rand.Int (0, 4)
     var step := 0
     var t : ^moveable
-    Sprite.Show(gobIdle)
     
     body proc update
-	if x > ^t.x+5 then
-	    x -= speed
-	elsif x < ^t.x-5 then 
-	    x += speed
-	else
-	    if y > ^t.y+5 then
-		y -= speed
-	    elsif y < ^t.y-5 then
-		y += speed
-	    end if
-	end if
+        if x > ^t.x+5 then
+            x -= speed
+        elsif x < ^t.x-5 then 
+            x += speed
+        else
+            if y > ^t.y+5 then
+                y -= speed
+            elsif y < ^t.y-5 then
+                y += speed
+            end if
+        end if
     end update
     
     body proc collide
     end collide
     
     body proc draw
-	Sprite.SetPosition(gobIdle, x, y, true)
+        Pic.Draw(gobIdle ,x-20, y-20, picCopy)
     end draw
 end goblin
 
 % Procedure to check for collisions between two moveable objects
 proc checkColl(m1, m2 : ^moveable)
     if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
-	^m1.collide(m2)
-	^m2.collide(m1)
+        ^m1.collide(m2)
+        ^m2.collide(m1)
     end if
 end checkColl
 
