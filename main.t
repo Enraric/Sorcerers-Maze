@@ -6,6 +6,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 include "pictures.t"
+var ww := Pic.FileNew("Graphics/mage_idle.bmp")
+var * wizIdle := Sprite.New(ww)
+var gg := Pic.FileNew("Graphics/superdoor_open.bmp")
+var * gobIdle := Sprite.New(gg)
 
 % Variable Declaration
 
@@ -47,6 +51,7 @@ end item
 
 % The parent class for all things on-screen that move
 class moveable
+    import Sprite
     export update, draw, collide, setXY, x, y, kind, damage
     var kind : mode
     var x, y : int
@@ -146,6 +151,7 @@ class * goblin
     var randmove := Rand.Int (0, 4)
     var step := 0
     var t : ^moveable
+    Sprite.Show(gobIdle)
     
     body proc update
 	if x > ^t.x+5 then
@@ -165,7 +171,7 @@ class * goblin
     end collide
     
     body proc draw
-	
+	Sprite.SetPosition(gobIdle, x, y, true)
     end draw
 end goblin
 
