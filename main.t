@@ -7,9 +7,9 @@
 
 include "pictures.t"
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove : array 1..4 of array 1..2 of int
+var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
-var * gobMove : array 1..4 of array 1..2 of int
+var * gobMove : array 1 .. 4 of array 1 .. 2 of int
 
 % Variable Declaration
 
@@ -33,7 +33,8 @@ proc gameover
     View.Update
 end gameover
 
-% The parent class for all types of items
+% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class * item
     export initialize, use, draw
     
@@ -49,7 +50,8 @@ class * item
     end draw
 end item
 
-% The parent class for all things on-screen that move
+% The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 class moveable
     import Sprite
     export update, draw, collide, setXY, x, y, kind, damage
@@ -177,7 +179,14 @@ class * goblin
     end draw
 end goblin
 
-% Procedure to check for collisions between two moveable objects
+% Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class wall
+    
+end wall
+
+% Procedure to check for collisions between two moveable objects %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 proc checkColl(m1, m2 : ^moveable)
     if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
         ^m1.collide(m2)
