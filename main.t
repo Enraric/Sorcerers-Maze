@@ -10,7 +10,7 @@ var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
 var * gobMove : array 1 .. 4 of array 1 .. 2 of int
 
-% Variable Declaration
+% Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
