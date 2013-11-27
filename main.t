@@ -5,7 +5,6 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-include "pictures.t"
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
 var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
@@ -19,11 +18,51 @@ var * lose : boolean := false
 var * title := Font.New ("Serif:48:Bold")
 type * mode : enum(friend, enemy, neutral)
 
+% The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * object
+    export draw, setXY, x, y
+    var x, y : int
+    var pic : int
+    
+    deferred proc draw
+    
+    proc setXY(nx, ny : int)
+        x := nx
+        y := ny
+    end setXY
+end object
+
+% The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * moveable
+    inherit object
+    export update, collide, kind, damage
+    var kind : mode
+    var speed : int
+    var health : real
+    var damage : real
+    
+    deferred proc update
+    deferred proc collide(m : ^moveable)
+end moveable
+
+% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * static
+    inherit object
+    
+    body proc draw
+        Pic.Draw(pic, x, y, picCopy)
+    end draw
+end static
+
 % The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * item
-    export initialize, use, draw
+    export initialize, use, draw, var w
     
+    var w : ^moveable
     var pic : int
     
     proc initialize(p : int)
@@ -32,42 +71,37 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-        %Pic.Draw(48 * i + 50)
+        Pic.Draw(pic, 48 * i + 50, maxy-50, picCopy)
     end draw
 end item
-
-% The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * moveable
-    import Sprite
-    export update, draw, collide, setXY, x, y, kind, damage
-    var kind : mode
-    var pic : int
-    var x, y : int
-    var health : real
-    var speed : int
-    var damage : real
-    
-    deferred proc update
-    deferred proc draw
-    deferred proc collide(m : ^moveable)
-    
-    proc setXY(nx, ny : int)
-        x := nx
-        y := ny
-    end setXY
-end moveable
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
     inherit moveable
     export var direct
+    
+    speed := 5
+    damage := 50.0
+    kind := mode.friend
     var direct : 1..4
     
     body proc update
-        
+        case direct of
+        label 1:
+            y += speed
+        label 2:
+            x += speed
+        label 3:
+            y -= speed
+        label 4:
+            x -= speed
+        end case
     end update
+    
+    body proc draw
+        Pic.Draw(pic, x-20, y-20, picCopy)
+    end draw
 end fireball
 
 % Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -75,7 +109,7 @@ end fireball
 class * wizard
     inherit moveable
     
-    kind := mode.friend
+    kind := mode.neutral
     x := 100
     y := 100
     pic := wizIdle
@@ -166,22 +200,16 @@ class * goblin
         end if
     end update
     
-    body proc collide
+    body proc collide(m : ^moveable)
+        if ^m.kind = mode.friend then
+            health -= ^m.damage
+        end if
     end collide
     
     body proc draw
         Pic.Draw(gobIdle ,x-20, y-20, picCopy)
     end draw
 end goblin
-
-% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * static
-    export draw, x, y
-    var x, y : int
-    
-    deferred proc draw
-end static
 
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -191,13 +219,15 @@ module game
     var w : ^wizard
     var g : flexible array 1..0 of ^goblin
     var f : flexible array 1..0 of ^fireball
-    var t : boolean
+    var level : array 1..13, 1..20 of ^static
     
-    proc checkColl(m1, m2 : ^moveable)
-        if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
+    fcn checkColl(m1, m2 : ^moveable) : boolean
+        var c := abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40
+        if c then
             ^m1.collide(m2)
             ^m2.collide(m1)
         end if
+        result c
     end checkColl
     
     proc gameover
@@ -214,10 +244,10 @@ module game
         g(upper(g)) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
     end spawn
     
-    proc initialize
+    proc initialize(numGob : int)
         new w
-        for i : 1..1
-            new g, i
+        new g, numGob
+        for i : 1..numGob
             new g(i)
             g(i) -> t := w
             g(i) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
@@ -228,9 +258,9 @@ module game
         w -> update
         for i : 1..upper(g)
             g(i) -> update
-            checkColl(w, g(i))
+            var tmp := checkColl(w, g(i))
         end for
-        if keys('c') then
+            if keys('c') then
             spawn
         end if
     end update
@@ -240,6 +270,9 @@ module game
         for i : 1..upper(g)
             g(i) -> draw
         end for
+            for i : 1..upper(f)
+            f(i) -> draw
+        end for
     end draw
 end game
 
@@ -247,7 +280,7 @@ end game
 
 View.Set ("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize
+game.initialize(1)
 
 loop
     Input.KeyDown (keys)
@@ -258,4 +291,5 @@ loop
     Time.DelaySinceLast (16)
     exit when lose
 end loop
+
 game.gameover
