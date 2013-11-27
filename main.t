@@ -19,15 +19,6 @@ var * lose : boolean := false
 var * title := Font.New ("Serif:48:Bold")
 type * mode : enum(friend, enemy, neutral)
 
-% Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-proc gameover
-    cls
-    drawfillbox (0, 0, maxx, maxy, black)
-    Font.Draw ("Game Over", 250, 300, title, white)
-    View.Update
-end gameover
-
 % The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * item
@@ -47,7 +38,7 @@ end item
 
 % The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class moveable
+class * moveable
     import Sprite
     export update, draw, collide, setXY, x, y, kind, damage
     var kind : mode
@@ -154,8 +145,6 @@ class * goblin
     export var t
     
     kind := mode.enemy
-    x := 300
-    y := 300
     health := 1.0
     speed := 2
     damage := 0.75
@@ -187,40 +176,86 @@ end goblin
 
 % The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class static
+class * static
     export draw, x, y
     var x, y : int
     
     deferred proc draw
 end static
 
-% Procedure to check for collisions between two moveable objects %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-proc checkColl(m1, m2 : ^moveable)
-    if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
-        ^m1.collide(m2)
-        ^m2.collide(m1)
-    end if
-end checkColl
+module game
+    export all
+    
+    var w : ^wizard
+    var g : flexible array 1..0 of ^goblin
+    var f : flexible array 1..0 of ^fireball
+    var t : boolean
+    
+    proc checkColl(m1, m2 : ^moveable)
+        if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
+            ^m1.collide(m2)
+            ^m2.collide(m1)
+        end if
+    end checkColl
+    
+    proc gameover
+        cls
+        drawfillbox (0, 0, maxx, maxy, black)
+        Font.Draw ("Game Over", 250, 300, title, white)
+        View.Update
+    end gameover
+    
+    proc spawn
+        new g, upper(g) + 1
+        new g(upper(g))
+        g(upper(g)) -> t := w
+        g(upper(g)) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
+    end spawn
+    
+    proc initialize
+        new w
+        for i : 1..1
+            new g, i
+            new g(i)
+            g(i) -> t := w
+            g(i) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
+        end for
+    end initialize
+    
+    proc update
+        w -> update
+        for i : 1..upper(g)
+            g(i) -> update
+            checkColl(w, g(i))
+        end for
+        if keys('c') then
+            spawn
+        end if
+    end update
+    
+    proc draw
+        w -> draw
+        for i : 1..upper(g)
+            g(i) -> draw
+        end for
+    end draw
+end game
 
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set ("graphics:800;580,offscreenonly,nobuttonbar")
-var g : ^goblin
-new g
-var w : ^wizard
-new w
-^g.t := w
+
+game.initialize
+
 loop
     Input.KeyDown (keys)
-    w -> update
-    w -> draw
-    g -> update
-    g -> draw
-    checkColl(w, g)
+    game.update
+    game.draw
     View.Update
     cls
     Time.DelaySinceLast (16)
     exit when lose
 end loop
-gameover
+game.gameover
