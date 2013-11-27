@@ -181,7 +181,7 @@ class * goblin
     kind := mode.enemy
     health := 1.0
     speed := 2
-    damage := 0.75
+    damage := 0.5
     var randmove := Rand.Int (0, 4)
     var step := 0
     var t : ^moveable
