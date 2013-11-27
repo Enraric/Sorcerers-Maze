@@ -13,18 +13,13 @@ var * gobMove : array 1 .. 4 of array 1 .. 2 of int
 
 % Variable Declaration
 
-const * UP := chr (119)
-const * DOWN := chr (115)
-const * LEFT := chr (97)
-const * RIGHT := chr (100)
-const * SPACE := chr (32)
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 var * lose : boolean := false
 var * title := Font.New ("Serif:48:Bold")
 type * mode : enum(friend, enemy, neutral)
 
-% Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gameover
     cls
@@ -33,7 +28,7 @@ proc gameover
     View.Update
 end gameover
 
-% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * item
     export initialize, use, draw
@@ -50,7 +45,7 @@ class * item
     end draw
 end item
 
-% The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The parent class for all things on-screen that move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class moveable
     import Sprite
@@ -72,7 +67,19 @@ class moveable
     end setXY
 end moveable
 
-%Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * fireball
+    inherit moveable
+    export var direct
+    var direct : 1..4
+    
+    body proc update
+        
+    end update
+end fireball
+
+% Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * wizard
     inherit moveable
@@ -106,18 +113,18 @@ class * wizard
         if mana < 100 then
             mana += 0.05
         end if
-        if keys (UP) then
+        if keys ('w') then
             y += speed
-        elsif keys (DOWN) then
+        elsif keys ('s') then
             y -= speed
-        elsif keys (LEFT) then
+        elsif keys ('a') then
             x -= speed
-        elsif keys (RIGHT) then
+        elsif keys ('d') then
             x += speed
         else
             pic := wizIdle
         end if
-        if keys (SPACE) then
+        if keys (' ') then
             heal
         end if
         lose := health <= 0
@@ -138,10 +145,9 @@ class * wizard
             items(i) -> draw(i)
         end for
     end draw
-    
 end wizard
 
-% Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * goblin
     inherit moveable
@@ -179,13 +185,16 @@ class * goblin
     end draw
 end goblin
 
-% Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class wall
+class static
+    export draw, x, y
+    var x, y : int
     
-end wall
+    deferred proc draw
+end static
 
-% Procedure to check for collisions between two moveable objects %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Procedure to check for collisions between two moveable objects %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc checkColl(m1, m2 : ^moveable)
     if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
@@ -194,7 +203,7 @@ proc checkColl(m1, m2 : ^moveable)
     end if
 end checkColl
 
-%Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set ("graphics:800;580,offscreenonly,nobuttonbar")
 var g : ^goblin
