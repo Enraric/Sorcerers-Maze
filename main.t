@@ -26,14 +26,12 @@ var * fire : array 1 .. 4 of array 1 .. 2 of int
 for i : 1..2
     fire(1)(i) := Pic.FileNew("Graphics/fire_"+intstr(i)+".bmp")
 end for
-    
-for i : 2..4
+    for i : 2..4
     for j : 1..2
         fire(i)(j) := Pic.Rotate(fire(1)(j), (5-i)*90, 20, 20)
     end for
 end for
     
-
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 var * keys : array char of boolean
@@ -84,7 +82,7 @@ class * static
     inherit object
     
     body proc draw
-        Pic.Draw(pic, pos.x, pos.y, picCopy)
+        Pic.Draw(pic, pos.x, pos.y, picMerge)
     end draw
 end static
 
@@ -102,7 +100,7 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 50, maxy-50, picCopy)
+        Pic.Draw(pic, 48 * i + 50, maxy-50, picMerge)
     end draw
 end item
 
@@ -112,6 +110,7 @@ class * fireball
     inherit moveable
     export var direct
     
+    pic := wizIdle
     speed := 5
     damage := 50.0
     kind := mode.friend
@@ -136,7 +135,7 @@ class * fireball
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
     end draw
 end fireball
 
@@ -191,7 +190,7 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -243,7 +242,7 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picMerge)
     end draw
 end goblin
 
@@ -256,8 +255,9 @@ module game
     var w : ^wizard
     var first : ^moveable := nil
     var last : ^moveable := nil
-    
+    var f : flexible array 1..0 of ^fireball
     var level : array 1..13, 1..20 of ^static
+    var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= 40 and abs(^m1.pos.y - ^m2.pos.y) <= 40
@@ -303,20 +303,27 @@ module game
         var cur := first
         loop
             exit when cur = nil
-
             if cur -> next not= nil and not cur -> next -> isAlive then
                 var dead := cur -> next
-                
                 cur -> setNext (dead -> next)
-                
                 if dead = last then
                     last := cur
                 end if
-                
                 free dead
             end if
             cur := cur -> next
         end loop
+        var numDead := 0
+        for i : 1..upper(f)
+            if not f(i) -> isAlive then
+                var dead := f(i)
+                f(i) := f(upper(f))
+                numDead += 1
+                free dead
+            end if
+        end for
+            
+        new f, upper(f)- numDead
     end sweep
     
     proc update
@@ -327,12 +334,32 @@ module game
             if cur -> isAlive then
                 cur -> update
                 var tmp := checkColl(cur, w)
+                for i : 1..upper(f)
+                    if f(i) -> isAlive then
+                        var temp := checkColl(cur, f(i))
+                    end if
+                end for
             end if
             cur := cur -> next
         end loop
+        for i : 1..upper(f)
+            if f(i) -> isAlive then
+                f(i) -> update
+            end if
+        end for
+            
         if keys('c') then
             spawnGoblin
         end if
+        for i : 1..4
+            if keys(arrowKeys(i)) then
+                new f, upper(f) + 1
+                new f(upper(f))
+                f(upper(f)) -> direct := i
+                f(upper(f)) -> setXY(^w.pos)
+            end if
+        end for
+            
         if Time.Elapsed - timer > 1000 then
             sweep
             timer := Time.Elapsed
@@ -349,6 +376,9 @@ module game
             end if
             cur := cur -> next
         end loop
+        for i : 1..upper(f)
+            f(i) -> draw
+        end for
     end draw
 end game
 
@@ -356,7 +386,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(7)
+game.initialize(1)
 
 loop
     Input.KeyDown (keys)
