@@ -59,21 +59,16 @@ end object
 
 class * moveable
     inherit object
-    export update, collide, setNext, kind, damage, var isAlive, var next
+    export update, collide, kind, damage, var isAlive
     var kind : mode
     var speed : int
     var health : real
     var damage : real
     var limit : 1..4
     var isAlive := true
-    var next : ^moveable
     
     deferred proc update
     deferred proc collide(m : ^moveable)
-    
-    proc setNext(n : ^moveable)
-        next := n
-    end setNext
 end moveable
 
 % The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,7 +105,6 @@ class * fireball
     inherit moveable
     export var direct
     
-    pic := wizIdle
     speed := 5
     damage := 50.0
     kind := mode.friend
@@ -257,8 +251,7 @@ module game
     var timer := 0
     var shot := false
     var w : ^wizard
-    var first : ^moveable := nil
-    var last : ^moveable := nil
+    var g : flexible array 1..0 of ^goblin
     var f : flexible array 1..0 of ^fireball
     var level : array 1..13, 1..20 of ^static
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
@@ -280,21 +273,18 @@ module game
     end gameover
     
     proc spawnGoblin
-        var cur : ^goblin
-        new goblin, cur
-        
-        if last = nil then
-            first := cur
-            last := first
-        else
-            last -> setNext (cur)
-            last := cur
-        end if
-        
-        cur -> setNext(nil)
-        cur -> t := w
-        cur -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
+        new g, upper(g)+1
+        new g(upper(g))
+        g(upper(g)) -> t := w
+        g(upper(g)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
     end spawnGoblin
+    
+    proc spawnFireball(i : int)
+        new f, upper(f) + 1
+        new f(upper(f))
+        f(upper(f)) -> direct := i
+        f(upper(f)) -> setXY(^w.pos)
+    end spawnFireball
     
     proc initialize(numGob : int)
         new w
@@ -304,20 +294,19 @@ module game
     end initialize
     
     proc sweep
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> next not= nil and not cur -> next -> isAlive then
-                var dead := cur -> next
-                cur -> setNext (dead -> next)
-                if dead = last then
-                    last := cur
-                end if
-                free dead
-            end if
-            cur := cur -> next
-        end loop
         var numDead := 0
+        for i : 1..upper(g)
+            if not g(i) -> isAlive then
+                var dead := g(i)
+                g(i) := g(upper(g))
+                numDead += 1
+                free dead
+                exit
+            end if
+        end for
+            
+        new g, upper(g)- numDead
+        numDead := 0
         for i : 1..upper(f)
             if not f(i) -> isAlive then
                 var dead := f(i)
@@ -337,28 +326,23 @@ module game
         end if
         for i : 1..4
             if keys(arrowKeys(i)) then
-                new f, upper(f) + 1
-                new f(upper(f))
-                f(upper(f)) -> direct := i
-                f(upper(f)) -> setXY(^w.pos)
+                spawnFireball(i)
             end if
         end for
             
         w -> update
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> update
-                var tmp := checkColl(cur, w)
-                for i : 1..upper(f)
-                    if f(i) -> isAlive then
-                        var temp := checkColl(cur, f(i))
+        for i : 1..upper(g)
+            if g(i) -> isAlive then
+                g(i) -> update
+                var tmp := checkColl(g(i), w)
+                for j : 1..upper(f)
+                    if f(j) -> isAlive then
+                        var temp := checkColl(g(i), f(j))
                     end if
                 end for
             end if
-            cur := cur -> next
-        end loop
+        end for
+            
         for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> update
@@ -373,21 +357,19 @@ module game
     
     proc draw
         w -> draw
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> draw
+        for i : 1..upper(g)
+            if g(i) -> isAlive then
+                g(i) -> draw
             end if
-            cur := cur -> next
-        end loop
+        end for
+            
         for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> draw
             end if
         end for
             
-        locate(1, 1)
+        locate(1,1)
         put upper(f)
     end draw
 end game
