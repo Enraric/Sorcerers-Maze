@@ -261,6 +261,7 @@ module game
         new g(upper(g))
         g(upper(g)) -> t := w
         g(upper(g)) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
+        g(upper(g)) -> isAlive := false
     end spawn
     
     proc initialize(numGob : int)
@@ -268,6 +269,7 @@ module game
         for i : 1..numGob
             spawn
         end for
+            g(upper(g)) -> isAlive := true
     end initialize
     
     proc update
@@ -293,26 +295,30 @@ module game
         end if
         
         if Time.Elapsed - timer > 10000 then
+            var numDead := 0
             for i : 1..upper(g)
                 if not g(i) -> isAlive then
-                    free g(i)
                     for j : i..upper(g)-1
-                        g(j) := g(j+1)
+                        g(j) := ^(g(j+1))
                     end for
-                        new g, upper(g)-1
+                        
+                    numDead += 1
                 end if
             end for
                 
+            new g, upper(g)-numDead
+            numDead := 0
             for i : 1..upper(f)
                 if not f(i) -> isAlive then
-                    free f(i)
                     for j : i..upper(f)-1
                         f(j) := f(j+1)
                     end for
-                        new f, upper(f)-1
+                        
+                    numDead += 1
                 end if
             end for
                 
+            new f, upper(f)-numDead
             timer := Time.Elapsed
         end if
     end update
@@ -320,9 +326,9 @@ module game
     proc draw
         w -> draw
         for i : 1..upper(g)
-            if g(i) -> isAlive then
-                g(i) -> draw
-            end if
+            %if g(i) -> isAlive then
+            g(i) -> draw
+            %end if
         end for
             
         for i : 1..upper(f)
@@ -330,6 +336,9 @@ module game
                 f(i) -> draw
             end if
         end for
+            
+        locate(1, 1)
+        put upper(g)
     end draw
 end game
 
@@ -337,7 +346,7 @@ end game
 
 View.Set ("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(1)
+game.initialize(3)
 
 loop
     Input.KeyDown (keys)
