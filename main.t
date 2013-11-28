@@ -82,7 +82,7 @@ class * static
     inherit object
     
     body proc draw
-        Pic.Draw(pic, pos.x, pos.y, picMerge)
+        Pic.Draw(pic, pos.x, pos.y, picCopy)
     end draw
 end static
 
@@ -100,7 +100,7 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 50, maxy-50, picMerge)
+        Pic.Draw(pic, 48 * i + 50, maxy-50, picCopy)
     end draw
 end item
 
@@ -127,6 +127,9 @@ class * fireball
         label 4:
             pos.x -= speed
         end case
+        if pos.x > maxx or pos.x < 0 or pos.y > maxy or pos.y < 0 then
+            isAlive := false
+        end if
         pic := fire(direct)(1)
     end update
     
@@ -135,7 +138,7 @@ class * fireball
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end fireball
 
@@ -190,7 +193,7 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -242,7 +245,7 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picCopy)
     end draw
 end goblin
 
@@ -252,6 +255,7 @@ module game
     export all
     
     var timer := 0
+    var shot := false
     var w : ^wizard
     var first : ^moveable := nil
     var last : ^moveable := nil
@@ -320,6 +324,7 @@ module game
                 f(i) := f(upper(f))
                 numDead += 1
                 free dead
+                exit
             end if
         end for
             
@@ -327,75 +332,82 @@ module game
     end sweep
     
     proc update
-        w -> update
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> update
-                var tmp := checkColl(cur, w)
-                for i : 1..upper(f)
-                    if f(i) -> isAlive then
-                        var temp := checkColl(cur, f(i))
-                    end if
-                end for
-            end if
-            cur := cur -> next
-        end loop
-        for i : 1..upper(f)
-            if f(i) -> isAlive then
-                f(i) -> update
-            end if
-        end for
-            
         if keys('c') then
             spawnGoblin
         end if
         for i : 1..4
-            if keys(arrowKeys(i)) then
-                new f, upper(f) + 1
-                new f(upper(f))
-                f(upper(f)) -> direct := i
-                f(upper(f)) -> setXY(^w.pos)
-            end if
+                if keys(arrowKeys(i)) and not shot then
+                    new f, upper(f) + 1
+                    new f(upper(f))
+                    f(upper(f)) -> direct := i
+                    f(upper(f)) -> setXY(^w.pos)
+                    shot := true
+                elsif shot then
+                    shot := false
+                end if
         end for
-            
-        if Time.Elapsed - timer > 1000 then
-            sweep
-            timer := Time.Elapsed
+            w -> update
+    var cur := first
+    loop
+        exit when cur = nil
+        if cur -> isAlive then
+            cur -> update
+            var tmp := checkColl(cur, w)
+            for i : 1..upper(f)
+                if f(i) -> isAlive then
+                    var temp := checkColl(cur, f(i))
+                end if
+            end for
         end if
-    end update
-    
-    proc draw
-        w -> draw
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> draw
-            end if
-            cur := cur -> next
-        end loop
-        for i : 1..upper(f)
+        cur := cur -> next
+    end loop
+    for i : 1..upper(f)
+        if f(i) -> isAlive then
+            f(i) -> update
+        end if
+    end for
+        
+    if Time.Elapsed - timer > 100 then
+        sweep
+        timer := Time.Elapsed
+    end if
+end update
+
+proc draw
+    w -> draw
+    var cur := first
+    loop
+        exit when cur = nil
+        if cur -> isAlive then
+            cur -> draw
+        end if
+        cur := cur -> next
+    end loop
+    for i : 1..upper(f)
+        if f(i) -> isAlive then
             f(i) -> draw
-        end for
-    end draw
+        end if
+    end for
+        
+    locate(1, 1)
+    put upper(f)
+end draw
 end game
 
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(1)
+game.initialize(10)
 
 loop
-    Input.KeyDown (keys)
-    game.update
-    game.draw
-    View.Update
-    cls
-    Time.DelaySinceLast (16)
-    exit when lose
+Input.KeyDown (keys)
+game.update
+game.draw
+View.Update
+cls
+Time.DelaySinceLast (16)
+exit when lose
 end loop
 
 game.gameover
