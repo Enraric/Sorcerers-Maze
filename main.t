@@ -132,7 +132,7 @@ class * fireball
     end update
     
     body proc collide(m : ^moveable)
-        isAlive := true
+        isAlive := false
     end collide
     
     body proc draw
@@ -333,37 +333,10 @@ module game
         if keys('c') then
             spawnGoblin
         end if
-<<<<<<< HEAD
-        
-        /*
-        if Time.Elapsed - timer > 10000 then
-            for i : 1..upper(g)
-                if not g(i) -> isAlive then
-                    free g(i)
-                    for j : i..upper(g)-1
-                        g(j) := g(j+1)
-                    end for
-                        new g, upper(g)-1
-                end if
-            end for
-                
-            for i : 1..upper(f)
-                if not f(i) -> isAlive then
-                    free f(i)
-                    for j : i..upper(f)-1
-                        f(j) := f(j+1)
-                    end for
-                        new f, upper(f)-1
-                end if
-            end for
-                
-=======
         if Time.Elapsed - timer > 1000 then
             sweep
->>>>>>> Friggin-classes
             timer := Time.Elapsed
         end if
-        */
     end update
     
     proc draw
