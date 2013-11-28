@@ -67,7 +67,7 @@ class * moveable
     var health : real
     var damage : real
     var limit : 1..4
-    var isAlive := false
+    var isAlive := true
     var next : ^moveable
     
     deferred proc update
@@ -132,7 +132,7 @@ class * fireball
     end update
     
     body proc collide(m : ^moveable)
-        isAlive := false
+        isAlive := true
     end collide
     
     body proc draw
@@ -290,7 +290,6 @@ module game
         cur -> setNext(nil)
         cur -> t := w
         cur -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
-        cur -> isAlive := false
     end spawnGoblin
     
     proc initialize(numGob : int)
@@ -304,8 +303,8 @@ module game
         var cur := first
         loop
             exit when cur = nil
-            
-            if cur -> next not= nil and cur -> next -> isAlive = false then
+
+            if cur -> next not= nil and not cur -> next -> isAlive then
                 var dead := cur -> next
                 
                 cur -> setNext (dead -> next)
@@ -316,29 +315,25 @@ module game
                 
                 free dead
             end if
-            
             cur := cur -> next
         end loop
     end sweep
     
     proc update
         w -> update
-        
         var cur := first
         loop
             exit when cur = nil
-            
-            cur -> update
-            var tmp := checkColl(cur, w)
-            
+            if cur -> isAlive then
+                cur -> update
+                var tmp := checkColl(cur, w)
+            end if
             cur := cur -> next
         end loop
-        
         if keys('c') then
             spawnGoblin
         end if
-        
-        if Time.Elapsed - timer > 500 then
+        if Time.Elapsed - timer > 1000 then
             sweep
             timer := Time.Elapsed
         end if
@@ -349,11 +344,9 @@ module game
         var cur := first
         loop
             exit when cur = nil
-            
             if cur -> isAlive then
                 cur -> draw
             end if
-            
             cur := cur -> next
         end loop
     end draw
@@ -363,7 +356,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(3)
+game.initialize(7)
 
 loop
     Input.KeyDown (keys)
