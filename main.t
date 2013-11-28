@@ -9,6 +9,16 @@ var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
 var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
 var * gobMove : array 1 .. 4 of array 1 .. 2 of int
+var * fire : array 1 .. 4 of array 1 .. 2 of int
+for i : 1..2
+    fire(1)(i) := Pic.FileNew("Graphics/fire_"+intstr(i)+".bmp")
+end for
+    for i : 2..4
+    for j : 1..2
+        fire(i)(j) := Pic.Rotate(fire(1)(j), (5-i)*90, 20, 20)
+    end for
+end for
+    
 
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -37,11 +47,13 @@ end object
 
 class * moveable
     inherit object
-    export update, collide, kind, damage
+    export update, collide, kind, damage, var isAlive
     var kind : mode
     var speed : int
     var health : real
     var damage : real
+    var limit : 1..4
+    var isAlive := true
     
     deferred proc update
     deferred proc collide(m : ^moveable)
@@ -97,7 +109,12 @@ class * fireball
         label 4:
             x -= speed
         end case
+        pic := fire(direct)(1)
     end update
+    
+    body proc collide(m : ^moveable)
+        isAlive := false
+    end collide
     
     body proc draw
         Pic.Draw(pic, x-20, y-20, picCopy)
@@ -198,6 +215,7 @@ class * goblin
                 y += speed
             end if
         end if
+        isAlive := not health <= 0
     end update
     
     body proc collide(m : ^moveable)
@@ -216,6 +234,7 @@ end goblin
 module game
     export all
     
+    var timer := 0
     var w : ^wizard
     var g : flexible array 1..0 of ^goblin
     var f : flexible array 1..0 of ^fireball
@@ -246,32 +265,70 @@ module game
     
     proc initialize(numGob : int)
         new w
-        new g, numGob
         for i : 1..numGob
-            new g(i)
-            g(i) -> t := w
-            g(i) -> setXY(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50))
+            spawn
         end for
     end initialize
     
     proc update
         w -> update
         for i : 1..upper(g)
-            g(i) -> update
-            var tmp := checkColl(w, g(i))
+            if g(i) -> isAlive then
+                g(i) -> update
+                var tmp := checkColl(w, g(i))
+            end if
         end for
-            if keys('c') then
+            
+        for i : 1..upper(f)
+            if f(i) -> isAlive then
+                f(i) -> update
+                for j : 1..upper(g)
+                    var tmp := checkColl(f(i), g(j))
+                end for
+            end if
+        end for
+            
+        if keys('c') then
             spawn
+        end if
+        
+        if Time.Elapsed - timer > 10000 then
+            for i : 1..upper(g)
+                if not g(i) -> isAlive then
+                    free g(i)
+                    for j : i..upper(g)-1
+                        g(j) := g(j+1)
+                    end for
+                        new g, upper(g)-1
+                end if
+            end for
+                
+            for i : 1..upper(f)
+                if not f(i) -> isAlive then
+                    free f(i)
+                    for j : i..upper(f)-1
+                        f(j) := f(j+1)
+                    end for
+                        new f, upper(f)-1
+                end if
+            end for
+                
+            timer := Time.Elapsed
         end if
     end update
     
     proc draw
         w -> draw
         for i : 1..upper(g)
-            g(i) -> draw
+            if g(i) -> isAlive then
+                g(i) -> draw
+            end if
         end for
-            for i : 1..upper(f)
-            f(i) -> draw
+            
+        for i : 1..upper(f)
+            if f(i) -> isAlive then
+                f(i) -> draw
+            end if
         end for
     end draw
 end game
