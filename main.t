@@ -305,7 +305,7 @@ module game
         loop
             exit when cur = nil
             
-            if cur -> next not= nil and (not cur -> next -> isAlive) then
+            if cur -> next not= nil and cur -> next -> isAlive = false then
                 var dead := cur -> next
                 
                 cur -> setNext (dead -> next)
@@ -338,7 +338,7 @@ module game
             spawnGoblin
         end if
         
-        if Time.Elapsed - timer > 1000 then
+        if Time.Elapsed - timer > 500 then
             sweep
             timer := Time.Elapsed
         end if
