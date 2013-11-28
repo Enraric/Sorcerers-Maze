@@ -292,7 +292,6 @@ module game
             spawn
         end if
         
-        /*
         if Time.Elapsed - timer > 10000 then
             for i : 1..upper(g)
                 if not g(i) -> isAlive then
@@ -316,7 +315,6 @@ module game
                 
             timer := Time.Elapsed
         end if
-        */
     end update
     
     proc draw
