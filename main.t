@@ -18,6 +18,8 @@ fcn * newP(x, y : int) : point
     result t
 end newP
 
+var * wallPic := Pic.FileNew("Graphics/wall.bmp")
+var * groundPic := Pic.FileNew("Graphics/ground.bmp")
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
 var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
@@ -75,6 +77,8 @@ end moveable
 
 class * static
     inherit object
+    
+    pic := groundPic
     
     body proc draw
         Pic.Draw(pic, pos.x, pos.y, picCopy)
@@ -145,8 +149,8 @@ class * wizard
     pos := newP(100, 100)
     pic := wizIdle
     speed := 3
-    health := 50.0
-    var mana := 50.0
+    health := 100.0
+    var mana := 100.0
     var items : flexible array 1..0 of ^item
     
     proc heal
@@ -211,6 +215,14 @@ class * wizard
     end draw
 end wizard
 
+% Wall Class
+
+class * wall
+    inherit static
+    
+    pic := wallPic
+end wall
+
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * goblin
@@ -251,6 +263,44 @@ class * goblin
     end draw
 end goblin
 
+% Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * room
+    export getTile, setTile, draw, initialize, map
+    
+    var map : array 0..19, 0..12 of ^static
+    
+    proc initialize
+        for x : 0..19
+            for y : 0..12
+                if y = 0 or x = 0 or y = 12 or x = 19 then
+                    new wall, map(x, y)
+                else
+                    new static, map(x, y)
+                end if
+                map(x, y) -> setXY(newP(x*40, y*40))
+            end for
+        end for
+    end initialize
+    
+    fcn getTile(x, y : int) : ^static
+        result map(x, y)
+    end getTile
+    
+    proc setTile(x, y : int, newTile : ^static)
+        map(x, y) := newTile
+        map(x, y) -> setXY(newP(x*40, y*40))
+    end setTile
+    
+    proc draw
+        for x : 0..19
+            for y : 0..12
+                map(x, y) -> draw
+            end for
+        end for
+    end draw
+end room
+
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module game
@@ -258,11 +308,11 @@ module game
     
     var timer := 0
     var shot : array 1..4 of boolean := init(false, false, false, false)
+    var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var w : ^wizard
     var g : flexible array 1..0 of ^goblin
     var f : flexible array 1..0 of ^fireball
-    var level : array 1..13, 1..20 of ^static
-    var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
+    var level : ^room
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= 40 and abs(^m1.pos.y - ^m2.pos.y) <= 40
@@ -298,9 +348,11 @@ module game
     
     proc initialize(numGob : int)
         new w
+        new level
         for i : 1..numGob
             spawnGoblin
         end for
+            ^level.initialize
     end initialize
     
     proc sweep
@@ -371,6 +423,7 @@ module game
     end update
     
     proc draw
+        ^level.draw
         w -> draw
         for i : 1..upper(g)
             if g(i) -> isAlive then
@@ -383,6 +436,8 @@ module game
                 f(i) -> draw
             end if
         end for
+            
+        
     end draw
 end game
 
