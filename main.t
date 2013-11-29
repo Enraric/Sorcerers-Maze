@@ -140,7 +140,7 @@ end fireball
 
 class * wizard
     inherit moveable
-    
+    export useMana
     kind := mode.neutral
     pos := newP(100, 100)
     pic := wizIdle
@@ -158,6 +158,14 @@ class * wizard
             health := 100
         end if
     end heal
+    
+    fcn useMana(use : real) : boolean
+        var u := mana - use > 0
+        if u then
+            mana -= use
+        end if
+        result u
+    end useMana
     
     body proc collide(m : ^moveable)
         if ^m.kind = mode.enemy then
@@ -249,7 +257,7 @@ module game
     export all
     
     var timer := 0
-    var shot := false
+    var shot : array 1..4 of boolean := init(false, false, false, false)
     var w : ^wizard
     var g : flexible array 1..0 of ^goblin
     var f : flexible array 1..0 of ^fireball
@@ -280,10 +288,12 @@ module game
     end spawnGoblin
     
     proc spawnFireball(i : int)
-        new f, upper(f) + 1
-        new f(upper(f))
-        f(upper(f)) -> direct := i
-        f(upper(f)) -> setXY(^w.pos)
+        if ^w.useMana(10.0) then
+            new f, upper(f) + 1
+            new f(upper(f))
+            f(upper(f)) -> direct := i
+            f(upper(f)) -> setXY(^w.pos)
+        end if
     end spawnFireball
     
     proc initialize(numGob : int)
@@ -326,7 +336,12 @@ module game
         end if
         for i : 1..4
             if keys(arrowKeys(i)) then
-                spawnFireball(i)
+                if not shot(i) then
+                    spawnFireball(i)
+                    shot(i) := true
+                end if
+            elsif shot(i) then
+                shot(i) := false
             end if
         end for
             
@@ -368,9 +383,6 @@ module game
                 f(i) -> draw
             end if
         end for
-            
-        locate(1,1)
-        put upper(f)
     end draw
 end game
 
