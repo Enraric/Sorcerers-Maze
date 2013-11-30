@@ -91,7 +91,7 @@ class * moveable
     
     proc move(dir : 1..4)
         if not limited(dir) then
-            move(dir)
+            move_unckecked(dir)
         end if
     end move
     
