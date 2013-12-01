@@ -18,10 +18,21 @@ fcn * newP(x, y : int) : point
     result t
 end newP
 
-fcn getDir(p1, p2 : point) : 1..4
-    if abs(p1.y - p2.y) < 40 then
-        result 1
-        
+fcn * getDir(p1, p2 : point) : 1..4
+    var n := p2.y > p2.x + p1.y - p1.x
+    var m := p2.y > -p2.x + p1.y + p1.x
+    if n then
+        if m then
+            result 1
+        else
+            result 4
+        end if
+    else
+        if m then
+            result 2
+        else
+            result 3
+        end if
     end if
 end getDir
 
@@ -69,17 +80,13 @@ end object
 
 class * moveable
     inherit object
-    export update, collide, move, limit, kind, damage, var isAlive
+    export update, collide, move, kind, damage, var isAlive, var limit
     var kind : mode
     var speed : int
     var health : real
     var damage : real
     var isAlive := true
-    var limited : array 1..4 of boolean := init(false, false, false, false)
-    
-    proc limit(i : 1..4)
-        limited(i) := not limited(i)
-    end limit
+    var limit : array 1..4 of boolean := init(false, false, false, false)
     
     proc move_unckecked(dir : 1..4)
         case dir of
@@ -95,7 +102,7 @@ class * moveable
     end move_unckecked
     
     proc move(dir : 1..4)
-        if not limited(dir) then
+        if not limit(dir) then
             move_unckecked(dir)
         end if
     end move
@@ -253,17 +260,7 @@ class * goblin
     var t : ^moveable
     
     body proc update
-        if pos.x > ^t.pos.x+5 then
-            pos.x -= speed
-        elsif pos.x < ^t.pos.x-5 then 
-            pos.x += speed
-        else
-            if pos.y > ^t.pos.y+5 then
-                pos.y -= speed
-            elsif pos.y < ^t.pos.y-5 then
-                pos.y += speed
-            end if
-        end if
+        move(getDir(pos, ^t.pos))
         isAlive := not health <= 0
     end update
     
@@ -425,7 +422,9 @@ module game
         for i : 1..upper(g)
             if g(i) -> isAlive then
                 g(i) -> update
-                var tmp := checkColl(g(i), w)
+                ^w.limit(getDir(^w.pos, ^(g(i)).pos)) := checkColl(g(i), w)
+                ^(g(i)).limit(getDir(^(g(i)).pos, ^w.pos)) := checkColl(g(i), w)
+                
                 for j : 1..upper(f)
                     if f(j) -> isAlive then
                         var temp := checkColl(g(i), f(j))
@@ -464,7 +463,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(0)
+game.initialize(3)
 
 loop
     Input.KeyDown (keys)
