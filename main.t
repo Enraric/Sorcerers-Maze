@@ -18,6 +18,27 @@ fcn * newP(x, y : int) : point
     result t
 end newP
 
+fcn * getDir(p1, p2 : point) : 1..4
+    var n := p2.y > p2.x + p1.y - p1.x
+    var m := p2.y > -p2.x + p1.y + p1.x
+    if n then
+        if m then
+            result 1
+        else
+            result 4
+        end if
+    else
+        if m then
+            result 2
+        else
+            result 3
+        end if
+    end if
+end getDir
+
+%var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
+var * wallPic := Pic.FileNew("Graphics/wall.bmp")
+var * groundPic := Pic.FileNew("Graphics/ground.bmp")
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
 var * wizMove : array 1 .. 4 of array 1 .. 2 of int
 var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
@@ -59,65 +80,16 @@ end object
 
 class * moveable
     inherit object
-    export update, collide, setNext, kind, damage, var isAlive, var next
+    export update, collide, move, kind, damage, var isAlive, var limit
     var kind : mode
     var speed : int
     var health : real
     var damage : real
-    var limit : 1..4
     var isAlive := true
-    var next : ^moveable
+    var limit : array 1..4 of boolean := init(false, false, false, false)
     
-    deferred proc update
-    deferred proc collide(m : ^moveable)
-    
-    proc setNext(n : ^moveable)
-        next := n
-    end setNext
-end moveable
-
-% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * static
-    inherit object
-    
-    body proc draw
-        Pic.Draw(pic, pos.x, pos.y, picCopy)
-    end draw
-end static
-
-% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * item
-    export initialize, use, draw, var w
-    
-    var w : ^moveable
-    var pic : int
-    
-    proc initialize(p : int)
-    end initialize
-    
-    deferred proc use
-    
-    proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 50, maxy-50, picCopy)
-    end draw
-end item
-
-% Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * fireball
-    inherit moveable
-    export var direct
-    
-    pic := wizIdle
-    speed := 5
-    damage := 50.0
-    kind := mode.friend
-    var direct : 1..4
-    
-    body proc update
-        case direct of
+    proc move_unckecked(dir : 1..4)
+        case dir of
         label 1:
             pos.y += speed
         label 2:
@@ -127,18 +99,70 @@ class * fireball
         label 4:
             pos.x -= speed
         end case
+    end move_unckecked
+    
+    proc move(dir : 1..4)
+        if not limit(dir) then
+            move_unckecked(dir)
+        end if
+    end move
+    
+    deferred proc update
+    deferred proc collide(m : ^moveable)
+end moveable
+
+% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * static
+    inherit object
+    
+    pic := groundPic
+    
+    body proc draw
+        Pic.Draw(pic, pos.x, pos.y, picCopy)
+    end draw
+end static
+
+% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * item
+    export use, draw, var w
+    
+    var w : ^moveable
+    var pic : int
+    
+    deferred proc use
+    
+    proc draw(i : int)
+        Pic.Draw(pic, 48 * i + 270, maxy-50, picCopy)
+    end draw
+end item
+
+% Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * fireball
+    inherit moveable
+    export var direct
+    
+    speed := 5
+    damage := 50.0
+    kind := mode.friend
+    var direct : 1..4
+    
+    body proc update
+        move(direct)
         if pos.x > maxx or pos.x < 0 or pos.y > maxy or pos.y < 0 then
             isAlive := false
         end if
         pic := fire(direct)(1)
     end update
     
-    body proc collide(m : ^moveable)
+    body proc collide
         isAlive := false
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
     end draw
 end fireball
 
@@ -146,14 +170,15 @@ end fireball
 
 class * wizard
     inherit moveable
-    
+    export useMana
     kind := mode.neutral
     pos := newP(100, 100)
     pic := wizIdle
     speed := 3
-    health := 50.0
-    var mana := 50.0
+    health := 100.0
+    var mana := 100.0
     var items : flexible array 1..0 of ^item
+    var wdsa : array 1..4 of char := init('w','d','s','a')
     
     proc heal
         if mana > 0 then
@@ -165,7 +190,15 @@ class * wizard
         end if
     end heal
     
-    body proc collide(m : ^moveable)
+    fcn useMana(use : real) : boolean
+        var u := mana - use > 0
+        if u then
+            mana -= use
+        end if
+        result u
+    end useMana
+    
+    body proc collide
         if ^m.kind = mode.enemy then
             health -= ^m.damage
         end if
@@ -175,18 +208,13 @@ class * wizard
         if mana < 100 then
             mana += 0.05
         end if
-        if keys ('w') then
-            pos.y += speed
-        elsif keys ('s') then
-            pos.y -= speed
-        elsif keys ('a') then
-            pos.x -= speed
-        elsif keys ('d') then
-            pos.x += speed
-        else
+        for i : 1..4
+            if keys(wdsa(i)) then
+                move(i)
+            end if
             pic := wizIdle
-        end if
-        if keys (' ') then
+        end for
+            if keys (' ') then
             heal
         end if
         lose := health <= 0
@@ -209,6 +237,14 @@ class * wizard
     end draw
 end wizard
 
+% Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * wall
+    inherit static
+    
+    pic := wallPic
+end wall
+
 % Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * goblin
@@ -224,21 +260,11 @@ class * goblin
     var t : ^moveable
     
     body proc update
-        if pos.x > ^t.pos.x+5 then
-            pos.x -= speed
-        elsif pos.x < ^t.pos.x-5 then 
-            pos.x += speed
-        else
-            if pos.y > ^t.pos.y+5 then
-                pos.y -= speed
-            elsif pos.y < ^t.pos.y-5 then
-                pos.y += speed
-            end if
-        end if
+        move(getDir(pos, ^t.pos))
         isAlive := not health <= 0
     end update
     
-    body proc collide(m : ^moveable)
+    body proc collide
         if ^m.kind = mode.friend then
             health -= ^m.damage
         end if
@@ -249,19 +275,68 @@ class * goblin
     end draw
 end goblin
 
+% Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * room
+    export getNear, getTile, setTile, draw, initialize, map
+    
+    var map : array 0..19, 0..12 of ^static
+    
+    proc initialize
+        for x : 0..19
+            for y : 0..12
+                if y = 0 or x = 0 or y = 12 or x = 19 then
+                    new wall, map(x, y)
+                else
+                    new static, map(x, y)
+                end if
+                map(x, y) -> setXY(newP(x*40, y*40))
+            end for
+        end for
+    end initialize
+    
+    fcn getNear(x, y : int) : array 1..9 of ^static
+        var a : array 1..9 of ^static
+        var c := 1
+        for xind : -1..1
+            for yind : -1..1
+                a(c) := map(x+xind, y+yind)
+                c += 1
+            end for
+        end for
+            result a
+    end getNear
+    
+    fcn getTile(x, y : int) : ^static
+        result map(x, y)
+    end getTile
+    
+    proc setTile(x, y : int, newTile : ^static)
+        map(x, y) := newTile
+        map(x, y) -> setXY(newP(x*40, y*40))
+    end setTile
+    
+    proc draw
+        for x : 0..19
+            for y : 0..12
+                map(x, y) -> draw
+            end for
+        end for
+    end draw
+end room
+
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module game
     export all
     
     var timer := 0
-    var shot := false
-    var w : ^wizard
-    var first : ^moveable := nil
-    var last : ^moveable := nil
-    var f : flexible array 1..0 of ^fireball
-    var level : array 1..13, 1..20 of ^static
+    var shot : array 1..4 of boolean := init(false, false, false, false)
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
+    var w : ^wizard
+    var g : flexible array 1..0 of ^goblin
+    var f : flexible array 1..0 of ^fireball
+    var level : ^room
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= 40 and abs(^m1.pos.y - ^m2.pos.y) <= 40
@@ -280,44 +355,43 @@ module game
     end gameover
     
     proc spawnGoblin
-        var cur : ^goblin
-        new goblin, cur
-        
-        if last = nil then
-            first := cur
-            last := first
-        else
-            last -> setNext (cur)
-            last := cur
-        end if
-        
-        cur -> setNext(nil)
-        cur -> t := w
-        cur -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
+        new g, upper(g)+1
+        new g(upper(g))
+        g(upper(g)) -> t := w
+        g(upper(g)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
     end spawnGoblin
+    
+    proc spawnFireball(i : int)
+        if ^w.useMana(5) then
+            new f, upper(f) + 1
+            new f(upper(f))
+            f(upper(f)) -> direct := i
+            f(upper(f)) -> setXY(^w.pos)
+        end if
+    end spawnFireball
     
     proc initialize(numGob : int)
         new w
+        new level
         for i : 1..numGob
             spawnGoblin
         end for
+            ^level.initialize
     end initialize
     
     proc sweep
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> next not= nil and not cur -> next -> isAlive then
-                var dead := cur -> next
-                cur -> setNext (dead -> next)
-                if dead = last then
-                    last := cur
-                end if
-                free dead
-            end if
-            cur := cur -> next
-        end loop
         var numDead := 0
+        for i : 1..upper(g)
+            if not g(i) -> isAlive then
+                var dead := g(i)
+                g(i) := g(upper(g))
+                numDead += 1
+                free dead
+                exit
+            end if
+        end for
+            new g, upper(g)- numDead
+        numDead := 0
         for i : 1..upper(f)
             if not f(i) -> isAlive then
                 var dead := f(i)
@@ -327,8 +401,7 @@ module game
                 exit
             end if
         end for
-            
-        new f, upper(f)- numDead
+            new f, upper(f)- numDead
     end sweep
     
     proc update
@@ -337,58 +410,52 @@ module game
         end if
         for i : 1..4
             if keys(arrowKeys(i)) then
-                new f, upper(f) + 1
-                new f(upper(f))
-                f(upper(f)) -> direct := i
-                f(upper(f)) -> setXY(^w.pos)
+                if not shot(i) then
+                    spawnFireball(i)
+                    shot(i) := true
+                end if
+            elsif shot(i) then
+                shot(i) := false
             end if
         end for
-            
-        w -> update
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> update
-                var tmp := checkColl(cur, w)
-                for i : 1..upper(f)
-                    if f(i) -> isAlive then
-                        var temp := checkColl(cur, f(i))
+            w -> update
+        for i : 1..upper(g)
+            if g(i) -> isAlive then
+                g(i) -> update
+                ^w.limit(getDir(^w.pos, ^(g(i)).pos)) := checkColl(g(i), w)
+                ^(g(i)).limit(getDir(^(g(i)).pos, ^w.pos)) := checkColl(g(i), w)
+                
+                for j : 1..upper(f)
+                    if f(j) -> isAlive then
+                        var temp := checkColl(g(i), f(j))
                     end if
                 end for
             end if
-            cur := cur -> next
-        end loop
-        for i : 1..upper(f)
+        end for
+            for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> update
             end if
         end for
-            
-        if Time.Elapsed - timer > 50 then
+            if Time.Elapsed - timer > 50 then
             sweep
             timer := Time.Elapsed
         end if
     end update
     
     proc draw
-        w -> draw
-        var cur := first
-        loop
-            exit when cur = nil
-            if cur -> isAlive then
-                cur -> draw
+        ^level.draw
+        for i : 1..upper(g)
+            if g(i) -> isAlive then
+                g(i) -> draw
             end if
-            cur := cur -> next
-        end loop
-        for i : 1..upper(f)
+        end for
+            for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> draw
             end if
         end for
-            
-        locate(1, 1)
-        put upper(f)
+            w -> draw
     end draw
 end game
 
@@ -396,7 +463,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(10)
+game.initialize(3)
 
 loop
     Input.KeyDown (keys)
