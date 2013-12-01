@@ -5,8 +5,6 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-var * DEBUG_MODE := false
-
 type * point:
 record
     x : int
@@ -19,6 +17,13 @@ fcn * newP(x, y : int) : point
     t.y := y
     result t
 end newP
+
+fcn getDir(p1, p2 : point) : 1..4
+    if abs(p1.y - p2.y) < 40 then
+        result 1
+        
+    end if
+end getDir
 
 %var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
 var * wallPic := Pic.FileNew("Graphics/wall.bmp")
@@ -145,7 +150,7 @@ class * fireball
         pic := fire(direct)(1)
     end update
     
-    body proc collide(m : ^moveable)
+    body proc collide
         isAlive := false
     end collide
     
@@ -186,7 +191,7 @@ class * wizard
         result u
     end useMana
     
-    body proc collide(m : ^moveable)
+    body proc collide
         if ^m.kind = mode.enemy then
             health -= ^m.damage
         end if
@@ -202,7 +207,7 @@ class * wizard
             end if
             pic := wizIdle
         end for
-        if keys (' ') then
+            if keys (' ') then
             heal
         end if
         lose := health <= 0
@@ -262,7 +267,7 @@ class * goblin
         isAlive := not health <= 0
     end update
     
-    body proc collide(m : ^moveable)
+    body proc collide
         if ^m.kind = mode.friend then
             health -= ^m.damage
         end if
@@ -276,7 +281,7 @@ end goblin
 % Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * room
-    export getTile, setTile, draw, initialize, map
+    export getNear, getTile, setTile, draw, initialize, map
     
     var map : array 0..19, 0..12 of ^static
     
@@ -292,6 +297,18 @@ class * room
             end for
         end for
     end initialize
+    
+    fcn getNear(x, y : int) : array 1..9 of ^static
+        var a : array 1..9 of ^static
+        var c := 1
+        for xind : -1..1
+            for yind : -1..1
+                a(c) := map(x+xind, y+yind)
+                c += 1
+            end for
+        end for
+            result a
+    end getNear
     
     fcn getTile(x, y : int) : ^static
         result map(x, y)
@@ -316,7 +333,6 @@ end room
 module game
     export all
     
-    var DEBUG_WIN : int
     var timer := 0
     var shot : array 1..4 of boolean := init(false, false, false, false)
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
@@ -377,7 +393,7 @@ module game
                 exit
             end if
         end for
-        new g, upper(g)- numDead
+            new g, upper(g)- numDead
         numDead := 0
         for i : 1..upper(f)
             if not f(i) -> isAlive then
@@ -388,7 +404,7 @@ module game
                 exit
             end if
         end for
-        new f, upper(f)- numDead
+            new f, upper(f)- numDead
     end sweep
     
     proc update
@@ -405,7 +421,7 @@ module game
                 shot(i) := false
             end if
         end for
-        w -> update
+            w -> update
         for i : 1..upper(g)
             if g(i) -> isAlive then
                 g(i) -> update
@@ -417,12 +433,12 @@ module game
                 end for
             end if
         end for
-        for i : 1..upper(f)
+            for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> update
             end if
         end for
-        if Time.Elapsed - timer > 50 then
+            if Time.Elapsed - timer > 50 then
             sweep
             timer := Time.Elapsed
         end if
@@ -435,12 +451,12 @@ module game
                 g(i) -> draw
             end if
         end for
-        for i : 1..upper(f)
+            for i : 1..upper(f)
             if f(i) -> isAlive then
                 f(i) -> draw
             end if
         end for
-        w -> draw
+            w -> draw
     end draw
 end game
 
