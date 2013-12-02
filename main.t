@@ -36,37 +36,42 @@ fcn * getDir(p1, p2 : point) : 1..4
     end if
 end getDir
 
+fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
+    var a : array 1..4 of array 1..2 of int
+    for i : 1..2
+        a(1)(i) := Pic.FileNew("Graphics/"+name+"_"+intstr(i)+".bmp")
+    end for
+        for i : 2..4
+        for j : 1..2
+            a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, 20, 20)
+        end for
+    end for
+    result a
+end loadPics
+
 %var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
 var * wallPic := Pic.FileNew("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew("Graphics/ground.bmp")
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove : array 1 .. 4 of array 1 .. 2 of int
-var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
-var * gobMove : array 1 .. 4 of array 1 .. 2 of int
-var * fire : array 1 .. 4 of array 1 .. 2 of int
-for i : 1..2
-    fire(1)(i) := Pic.FileNew("Graphics/fire_"+intstr(i)+".bmp")
-end for
-    for i : 2..4
-    for j : 1..2
-        fire(i)(j) := Pic.Rotate(fire(1)(j), (5-i)*90, 20, 20)
-    end for
-end for
-    
+var * wizMove := loadPics("mage")
+var * gobMove := loadPics("troll")
+var * fire := loadPics("fire")
+
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
-var * lose : boolean := false
+var * lose := false
 var * title := Font.New ("Serif:48:Bold")
 type * mode : enum(friend, enemy, neutral)
 
 % The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * object
-    export draw, setXY, pos
+    export draw, setXY, pos, solid
     var pos : point
     var pic : int
+    var solid : boolean
     
     deferred proc draw
     
@@ -80,9 +85,11 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit
+    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit, var direct
+    solid := true
     var kind : mode
     var speed : int
+    var direct : 1..4
     var health : real
     var damage : real
     var isAlive := true
@@ -119,7 +126,7 @@ class * moveable
     
     proc defCollide(m : ^moveable)
         collide(m)
-        limit(getDir(pos, ^m.pos)) := true
+        limit(getDir(pos, ^m.pos)) := true and ^m.solid
     end defCollide
 end moveable
 
@@ -127,7 +134,7 @@ end moveable
 
 class * static
     inherit object
-    
+    solid := false
     pic := groundPic
     
     body proc draw
@@ -153,13 +160,11 @@ end item
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
-    inherit moveable
-    export var direct
-    
+    inherit moveable    
     speed := 5
     damage := 50.0
     kind := mode.friend
-    var direct : 1..4
+    solid := false
     
     body proc update
         move(direct)
@@ -170,11 +175,13 @@ class * fireball
     end update
     
     body proc collide
-        isAlive := false
+        if ^m.kind not= mode.neutral then
+            isAlive := false
+        end if
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end fireball
 
@@ -220,11 +227,12 @@ class * wizard
         if mana < 100 then
             mana += 0.05
         end if
+        pic := wizIdle
         for i : 1..4
             if keys(wdsa(i)) then
                 move(i)
+                pic := wizMove(i)(1)
             end if
-            pic := wizIdle
         end for
             if keys (' ') then
             heal
@@ -248,12 +256,13 @@ class * wizard
         end for
     end draw
 end wizard
+var * w : ^wizard
 
 % Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * wall
     inherit static
-    
+    solid := true
     pic := wallPic
 end wall
 
@@ -261,7 +270,6 @@ end wall
 
 class * goblin
     inherit moveable
-    export var t
     
     kind := mode.enemy
     health := 1.0
@@ -269,10 +277,12 @@ class * goblin
     damage := 0.5
     var randmove := Rand.Int (0, 4)
     var step := 0
-    var t : ^moveable
+    var t := w
     
     body proc update
-        move(getDir(pos, ^t.pos))
+        direct := getDir(pos, ^t.pos)
+        move(direct)
+        pic := gobMove(direct)(1)
         isAlive := not health <= 0
     end update
     
@@ -283,7 +293,7 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end goblin
 
@@ -345,9 +355,7 @@ module game
     var timer := 0
     var shot : array 1..4 of boolean := init(false, false, false, false)
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
-    var w : ^wizard
-    var g : flexible array 1..0 of ^goblin
-    var f : flexible array 1..0 of ^fireball
+    var m : flexible array 1..0 of ^moveable
     var level : ^room
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
@@ -367,18 +375,17 @@ module game
     end gameover
     
     proc spawnGoblin
-        new g, upper(g)+1
-        new g(upper(g))
-        g(upper(g)) -> t := w
-        g(upper(g)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
+        new m, upper(m)+1
+        new goblin, m(upper(m))
+        m(upper(m)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
     end spawnGoblin
     
     proc spawnFireball(i : int)
         if ^w.useMana(5) then
-            new f, upper(f) + 1
-            new f(upper(f))
-            f(upper(f)) -> direct := i
-            f(upper(f)) -> setXY(^w.pos)
+            new m, upper(m)+1
+            new fireball, m(upper(m))
+            m(upper(m)) -> direct := i
+            m(upper(m)) -> setXY(^w.pos)
         end if
     end spawnFireball
     
@@ -393,27 +400,16 @@ module game
     
     proc sweep
         var numDead := 0
-        for i : 1..upper(g)
-            if not g(i) -> isAlive then
-                var dead := g(i)
-                g(i) := g(upper(g))
+        for i : 1..upper(m)
+            if not m(i) -> isAlive then
+                var dead := m(i)
+                m(i) := m(upper(m))
                 numDead += 1
                 free dead
                 exit
             end if
         end for
-            new g, upper(g)- numDead
-        numDead := 0
-        for i : 1..upper(f)
-            if not f(i) -> isAlive then
-                var dead := f(i)
-                f(i) := f(upper(f))
-                numDead += 1
-                free dead
-                exit
-            end if
-        end for
-            new f, upper(f)- numDead
+            new m, upper(m)-numDead
     end sweep
     
     proc update
@@ -431,26 +427,16 @@ module game
             end if
         end for
             w -> defUpdate
-        for i : 1..upper(g)
-            if g(i) -> isAlive then
-                g(i) -> defUpdate
-                var tmp := checkColl(g(i), w)
-                for j : i+1..upper(g)
-                    var temp := checkColl(g(i), g(j))
-                end for
-                    for j : 1..upper(f)
-                    if f(j) -> isAlive then
-                        var temp := checkColl(g(i), f(j))
-                    end if
+        for i : 1..upper(m)
+            if m(i) -> isAlive then
+                m(i) -> defUpdate
+                var tmp := checkColl(m(i), w)
+                for j : i+1..upper(m)
+                    var temp := checkColl(m(i), m(j))
                 end for
             end if
         end for
-            for i : 1..upper(f)
-            if f(i) -> isAlive then
-                f(i) -> defUpdate
-            end if
-        end for
-            if Time.Elapsed - timer > 50 then
+            if Time.Elapsed - timer > 100 then
             sweep
             timer := Time.Elapsed
         end if
@@ -458,14 +444,9 @@ module game
     
     proc draw
         ^level.draw
-        for i : 1..upper(g)
-            if g(i) -> isAlive then
-                g(i) -> draw
-            end if
-        end for
-            for i : 1..upper(f)
-            if f(i) -> isAlive then
-                f(i) -> draw
+        for i : 1..upper(m)
+            if m(i) -> isAlive then
+                m(i) -> draw
             end if
         end for
             w -> draw
