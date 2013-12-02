@@ -5,6 +5,8 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Stuff for Colision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 type * point:
 record
     x : int
@@ -35,6 +37,8 @@ fcn * getDir(p1, p2 : point) : 1..4
         end if
     end if
 end getDir
+
+% Loading Game Sprites %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
     var a : array 1..4 of array 1..2 of int
@@ -74,9 +78,7 @@ class * object
     var solid : boolean
     var kind : mode := mode.friend
     var damage : real
-    
-    
-    
+        
     deferred proc draw
     
     proc setXY(np : point)
@@ -183,7 +185,7 @@ class * fireball
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
     end draw
 end fireball
 
@@ -391,7 +393,7 @@ module game
     end spawnGoblin
     
     proc spawnFireball(i : int)
-        if ^w.useMana(5) then
+        if ^w.useMana(10) then
             new m, upper(m)+1
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
