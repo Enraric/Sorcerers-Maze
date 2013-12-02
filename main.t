@@ -36,23 +36,27 @@ fcn * getDir(p1, p2 : point) : 1..4
     end if
 end getDir
 
+fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
+    var a : array 1..4 of array 1..2 of int
+    for i : 1..2
+        a(1)(i) := Pic.FileNew("Graphics/"+name+"_"+intstr(i)+".bmp")
+    end for
+        for i : 2..4
+        for j : 1..2
+            a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, 20, 20)
+        end for
+    end for
+    result a
+end loadPics
+
 %var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
 var * wallPic := Pic.FileNew("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew("Graphics/ground.bmp")
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove : array 1 .. 4 of array 1 .. 2 of int
-var * gobIdle := Pic.FileNew("Graphics/superdoor_open.bmp")
-var * gobMove : array 1 .. 4 of array 1 .. 2 of int
-var * fire : array 1 .. 4 of array 1 .. 2 of int
-for i : 1..2
-    fire(1)(i) := Pic.FileNew("Graphics/fire_"+intstr(i)+".bmp")
-end for
-    for i : 2..4
-    for j : 1..2
-        fire(i)(j) := Pic.Rotate(fire(1)(j), (5-i)*90, 20, 20)
-    end for
-end for
-    
+var * wizMove := loadPics("mage")
+var * gobMove := loadPics("troll")
+var * fire := loadPics("fire")
+
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 var * keys : array char of boolean
@@ -64,9 +68,10 @@ type * mode : enum(friend, enemy, neutral)
 % The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * object
-    export draw, setXY, pos
+    export draw, setXY, pos, solid
     var pos : point
     var pic : int
+    var solid : boolean
     
     deferred proc draw
     
@@ -81,6 +86,7 @@ end object
 class * moveable
     inherit object
     export defUpdate, defCollide, move, kind, damage, var isAlive, var limit, var direct
+    solid := true
     var kind : mode
     var speed : int
     var direct : 1..4
@@ -120,7 +126,7 @@ class * moveable
     
     proc defCollide(m : ^moveable)
         collide(m)
-        limit(getDir(pos, ^m.pos)) := true
+        limit(getDir(pos, ^m.pos)) := true and ^m.solid
     end defCollide
 end moveable
 
@@ -128,7 +134,7 @@ end moveable
 
 class * static
     inherit object
-    
+    solid := false
     pic := groundPic
     
     body proc draw
@@ -158,6 +164,7 @@ class * fireball
     speed := 5
     damage := 50.0
     kind := mode.friend
+    solid := false
     
     body proc update
         move(direct)
@@ -168,11 +175,13 @@ class * fireball
     end update
     
     body proc collide
-        isAlive := false
+        if ^m.kind not= mode.neutral then
+            isAlive := false
+        end if
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end fireball
 
@@ -218,11 +227,12 @@ class * wizard
         if mana < 100 then
             mana += 0.05
         end if
+        pic := wizIdle
         for i : 1..4
             if keys(wdsa(i)) then
                 move(i)
+                pic := wizMove(i)(1)
             end if
-            pic := wizIdle
         end for
             if keys (' ') then
             heal
@@ -252,7 +262,7 @@ var * w : ^wizard
 
 class * wall
     inherit static
-    
+    solid := true
     pic := wallPic
 end wall
 
@@ -270,7 +280,9 @@ class * goblin
     var t := w
     
     body proc update
-        move(getDir(pos, ^t.pos))
+        direct := getDir(pos, ^t.pos)
+        move(direct)
+        pic := gobMove(direct)(1)
         isAlive := not health <= 0
     end update
     
@@ -281,7 +293,7 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(gobIdle, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end goblin
 
@@ -370,7 +382,7 @@ module game
     
     proc spawnFireball(i : int)
         if ^w.useMana(5) then
-            new m, upper(m) + 1
+            new m, upper(m)+1
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
             m(upper(m)) -> setXY(^w.pos)
@@ -397,7 +409,7 @@ module game
                 exit
             end if
         end for
-            new m, upper(m)- numDead
+            new m, upper(m)-numDead
     end sweep
     
     proc update
@@ -424,7 +436,7 @@ module game
                 end for
             end if
         end for
-            if Time.Elapsed - timer > 50 then
+            if Time.Elapsed - timer > 100 then
             sweep
             timer := Time.Elapsed
         end if
