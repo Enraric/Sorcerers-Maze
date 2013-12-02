@@ -80,7 +80,7 @@ end object
 
 class * moveable
     inherit object
-    export update, collide, move, kind, damage, var isAlive, var limit
+    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit
     var kind : mode
     var speed : int
     var health : real
@@ -109,6 +109,18 @@ class * moveable
     
     deferred proc update
     deferred proc collide(m : ^moveable)
+    
+    proc defUpdate
+        update
+        for i : 1..4
+            limit(i) := false
+        end for
+    end defUpdate
+    
+    proc defCollide(m : ^moveable)
+        collide(m)
+        limit(getDir(pos, ^m.pos)) := true
+    end defCollide
 end moveable
 
 % The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -341,8 +353,8 @@ module game
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= 40 and abs(^m1.pos.y - ^m2.pos.y) <= 40
         if c then
-            ^m1.collide(m2)
-            ^m2.collide(m1)
+            ^m1.defCollide(m2)
+            ^m2.defCollide(m1)
         end if
         result c
     end checkColl
@@ -418,14 +430,15 @@ module game
                 shot(i) := false
             end if
         end for
-            w -> update
+            w -> defUpdate
         for i : 1..upper(g)
             if g(i) -> isAlive then
-                g(i) -> update
-                ^w.limit(getDir(^w.pos, ^(g(i)).pos)) := checkColl(g(i), w)
-                ^(g(i)).limit(getDir(^(g(i)).pos, ^w.pos)) := checkColl(g(i), w)
-                
-                for j : 1..upper(f)
+                g(i) -> defUpdate
+                var tmp := checkColl(g(i), w)
+                for j : i+1..upper(g)
+                    var temp := checkColl(g(i), g(j))
+                end for
+                    for j : 1..upper(f)
                     if f(j) -> isAlive then
                         var temp := checkColl(g(i), f(j))
                     end if
@@ -434,7 +447,7 @@ module game
         end for
             for i : 1..upper(f)
             if f(i) -> isAlive then
-                f(i) -> update
+                f(i) -> defUpdate
             end if
         end for
             if Time.Elapsed - timer > 50 then
