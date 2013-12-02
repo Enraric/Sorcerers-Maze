@@ -19,8 +19,8 @@ fcn * newP(x, y : int) : point
 end newP
 
 fcn * getDir(p1, p2 : point) : 1..4
-    var n := p2.y > p2.x + p1.y - p1.x
-    var m := p2.y > -p2.x + p1.y + p1.x
+    var n := p2.y - p2.x > p1.y - p1.x
+    var m := p2.y + p2.x > p1.y + p1.x
     if n then
         if m then
             result 1
@@ -46,7 +46,7 @@ fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
             a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, 20, 20)
         end for
     end for
-    result a
+        result a
 end loadPics
 
 %var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
@@ -68,10 +68,14 @@ type * mode : enum(friend, enemy, neutral)
 % The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * object
-    export draw, setXY, pos, solid
+    export draw, setXY, pos, solid, kind, damage
     var pos : point
     var pic : int
     var solid : boolean
+    var kind : mode := mode.friend
+    var damage : real
+    
+    
     
     deferred proc draw
     
@@ -85,13 +89,11 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit, var direct
+    export defUpdate, defCollide, move, var isAlive, var limit, var direct
     solid := true
-    var kind : mode
     var speed : int
     var direct : 1..4
     var health : real
-    var damage : real
     var isAlive := true
     var limit : array 1..4 of boolean := init(false, false, false, false)
     
@@ -115,7 +117,7 @@ class * moveable
     end move
     
     deferred proc update
-    deferred proc collide(m : ^moveable)
+    deferred proc collide(m : ^object)
     
     proc defUpdate
         update
@@ -124,7 +126,7 @@ class * moveable
         end for
     end defUpdate
     
-    proc defCollide(m : ^moveable)
+    proc defCollide(m : ^object)
         collide(m)
         limit(getDir(pos, ^m.pos)) := true and ^m.solid
     end defCollide
@@ -132,7 +134,7 @@ end moveable
 
 % The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * static
+class * tile
     inherit object
     solid := false
     pic := groundPic
@@ -140,7 +142,7 @@ class * static
     body proc draw
         Pic.Draw(pic, pos.x, pos.y, picCopy)
     end draw
-end static
+end tile
 
 % The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -175,7 +177,7 @@ class * fireball
     end update
     
     body proc collide
-        if ^m.kind not= mode.neutral then
+        if ^m.kind not= mode.neutral and ^m.solid then
             isAlive := false
         end if
     end collide
@@ -225,7 +227,7 @@ class * wizard
     
     body proc update
         if mana < 100 then
-            mana += 0.05
+            mana += 0.1
         end if
         pic := wizIdle
         for i : 1..4
@@ -261,7 +263,7 @@ var * w : ^wizard
 % Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * wall
-    inherit static
+    inherit tile
     solid := true
     pic := wallPic
 end wall
@@ -302,7 +304,7 @@ end goblin
 class * room
     export getNear, getTile, setTile, draw, initialize, map
     
-    var map : array 0..19, 0..12 of ^static
+    var map : array 0..19, 0..12 of ^tile
     
     proc initialize
         for x : 0..19
@@ -310,15 +312,15 @@ class * room
                 if y = 0 or x = 0 or y = 12 or x = 19 then
                     new wall, map(x, y)
                 else
-                    new static, map(x, y)
+                    new tile, map(x, y)
                 end if
                 map(x, y) -> setXY(newP(x*40, y*40))
             end for
         end for
     end initialize
     
-    fcn getNear(x, y : int) : array 1..9 of ^static
-        var a : array 1..9 of ^static
+    fcn getNear(x, y : int) : array 1..9 of ^tile
+        var a : array 1..9 of ^tile
         var c := 1
         for xind : -1..1
             for yind : -1..1
@@ -329,11 +331,11 @@ class * room
             result a
     end getNear
     
-    fcn getTile(x, y : int) : ^static
+    fcn getTile(x, y : int) : ^tile
         result map(x, y)
     end getTile
     
-    proc setTile(x, y : int, newTile : ^static)
+    proc setTile(x, y : int, newTile : ^tile)
         map(x, y) := newTile
         map(x, y) -> setXY(newP(x*40, y*40))
     end setTile
@@ -366,6 +368,14 @@ module game
         end if
         result c
     end checkColl
+    
+    fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
+        var c := abs(^m.pos.x - (^s.pos.x+20)) <= 40 and abs(^m.pos.y - (^s.pos.y+20)) <= 40
+        if c then
+            ^m.defCollide(s)
+        end if
+        result c
+    end checkColl_tile
     
     proc gameover
         cls
@@ -427,7 +437,7 @@ module game
             end if
         end for
             w -> defUpdate
-        for i : 1..upper(m)
+            for i : 1..upper(m)
             if m(i) -> isAlive then
                 m(i) -> defUpdate
                 var tmp := checkColl(m(i), w)
