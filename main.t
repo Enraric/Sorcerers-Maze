@@ -80,9 +80,10 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit
+    export defUpdate, defCollide, move, kind, damage, var isAlive, var limit, var direct
     var kind : mode
     var speed : int
+    var direct : 1..4
     var health : real
     var damage : real
     var isAlive := true
@@ -135,16 +136,28 @@ class * static
     end draw
 end static
 
+% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * item
+    export use, draw, var w
+    
+    var w : ^moveable
+    var pic : int
+    
+    deferred proc use
+    
+    proc draw(i : int)
+        Pic.Draw(pic, 48 * i + 270, maxy-50, picCopy)
+    end draw
+end item
+
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
-    inherit moveable
-    export var direct
-    
+    inherit moveable    
     speed := 5
     damage := 50.0
     kind := mode.friend
-    var direct : 1..4
     
     body proc update
         move(direct)
@@ -233,21 +246,7 @@ class * wizard
         end for
     end draw
 end wizard
-
-% The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-class * item
-    export use, draw, var w
-    
-    var w : ^wizard
-    var pic : int
-    
-    deferred proc use
-    
-    proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 270, maxy-50, picCopy)
-    end draw
-end item
+var * w : ^wizard
 
 % Wall Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -261,7 +260,6 @@ end wall
 
 class * goblin
     inherit moveable
-    export var t
     
     kind := mode.enemy
     health := 1.0
@@ -269,7 +267,7 @@ class * goblin
     damage := 0.5
     var randmove := Rand.Int (0, 4)
     var step := 0
-    var t : ^moveable
+    var t := w
     
     body proc update
         move(getDir(pos, ^t.pos))
@@ -345,7 +343,6 @@ module game
     var timer := 0
     var shot : array 1..4 of boolean := init(false, false, false, false)
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
-    var w : ^wizard
     var m : flexible array 1..0 of ^moveable
     var level : ^room
     
@@ -368,7 +365,6 @@ module game
     proc spawnGoblin
         new m, upper(m)+1
         new goblin, m(upper(m))
-        m(upper(m)) -> t := w
         m(upper(m)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
     end spawnGoblin
     
