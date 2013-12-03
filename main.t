@@ -411,17 +411,19 @@ module game
     end initialize
     
     proc sweep
-        var numDead := 0
+        var a : flexible array 1..0 of ^moveable
         for i : 1..upper(m)
-            if not m(i) -> isAlive then
-                var dead := m(i)
-                m(i) := m(upper(m))
-                numDead += 1
-                free dead
-                exit
+            if m(i) -> isAlive then
+                new a, upper(a) + 1
+                a(upper(a)) := m(i)
+            else
+                free m(i)
             end if
         end for
-            new m, upper(m)-numDead
+        for i : 1..upper(a)
+            m(i) := a(i)
+        end for
+        new m, upper(a)
     end sweep
     
     proc update
@@ -456,7 +458,7 @@ module game
                 end for
             end if
         end for
-            if Time.Elapsed - timer > 100 then
+            if Time.Elapsed - timer > 1000 then
             sweep
             timer := Time.Elapsed
         end if
