@@ -420,10 +420,10 @@ module game
                 free m(i)
             end if
         end for
-        for i : 1..upper(a)
+            for i : 1..upper(a)
             m(i) := a(i)
         end for
-        new m, upper(a)
+            new m, upper(a)
     end sweep
     
     proc update
@@ -441,18 +441,20 @@ module game
             end if
         end for
             w -> defUpdate
-            var c := ^level.getNear(^w.pos.x div 40, ^w.pos.y div 40)
-            for i : 1..9
-                var tmp := checkColl_tile(w, c(i))
-            end for
-        for i : 1..upper(m)
+        var c := ^level.getNear(^w.pos.x div 40, ^w.pos.y div 40)
+        for i : 1..9
+            var tmp := checkColl_tile(w, c(i))
+        end for
+            for i : 1..upper(m)
             if m(i) -> isAlive then
                 m(i) -> defUpdate
                 var tmp := checkColl(m(i), w)
                 for j : i+1..upper(m)
-                    var temp := checkColl(m(i), m(j))
+                    if m(j) -> isAlive then
+                        var temp := checkColl(m(i), m(j))
+                    end if
                 end for
-                var a := ^level.getNear(^(m(i)).pos.x div 40, ^(m(i)).pos.y div 40)
+                    var a := ^level.getNear(^(m(i)).pos.x div 40, ^(m(i)).pos.y div 40)
                 for j : 1..9
                     var temp := checkColl_tile(m(i), a(j))
                 end for
