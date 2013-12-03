@@ -5,6 +5,8 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Stuff for Colision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 type * point:
 record
     x : int
@@ -35,6 +37,8 @@ fcn * getDir(p1, p2 : point) : 1..4
         end if
     end if
 end getDir
+
+% Loading Game Sprites %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
     var a : array 1..4 of array 1..2 of int
@@ -73,9 +77,7 @@ class * object
     var pic : int
     var solid : boolean
     var kind : mode := mode.friend
-    var damage : real
-    
-    
+    var damage : real := 0
     
     deferred proc draw
     
@@ -128,7 +130,7 @@ class * moveable
     
     proc defCollide(m : ^object)
         collide(m)
-        limit(getDir(pos, ^m.pos)) := true and ^m.solid
+        limit(getDir(pos, ^m.pos)) := ^m.solid
     end defCollide
 end moveable
 
@@ -140,7 +142,7 @@ class * tile
     pic := groundPic
     
     body proc draw
-        Pic.Draw(pic, pos.x, pos.y, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
     end draw
 end tile
 
@@ -155,7 +157,7 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 270, maxy-50, picCopy)
+        Pic.Draw(pic, 48 * i + 270, maxy-50, picMerge)
     end draw
 end item
 
@@ -183,7 +185,7 @@ class * fireball
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
     end draw
 end fireball
 
@@ -243,7 +245,7 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -314,7 +316,7 @@ class * room
                 else
                     new tile, map(x, y)
                 end if
-                map(x, y) -> setXY(newP(x*40, y*40))
+                map(x, y) -> setXY(newP(20+x*40, 20+y*40))
             end for
         end for
     end initialize
@@ -337,7 +339,7 @@ class * room
     
     proc setTile(x, y : int, newTile : ^tile)
         map(x, y) := newTile
-        map(x, y) -> setXY(newP(x*40, y*40))
+        map(x, y) -> setXY(newP(20+x*40, 20+y*40))
     end setTile
     
     proc draw
@@ -370,7 +372,7 @@ module game
     end checkColl
     
     fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
-        var c := abs(^m.pos.x - (^s.pos.x+20)) <= 40 and abs(^m.pos.y - (^s.pos.y+20)) <= 40
+        var c := abs(^m.pos.x - (^s.pos.x)) <= 40 and abs(^m.pos.y - (^s.pos.y)) <= 40
         if c then
             ^m.defCollide(s)
         end if
@@ -387,11 +389,11 @@ module game
     proc spawnGoblin
         new m, upper(m)+1
         new goblin, m(upper(m))
-        m(upper(m)) -> setXY(newP(Rand.Int(50, maxx-50), Rand.Int(50, maxy-50)))
+        m(upper(m)) -> setXY(newP(Rand.Int(100, maxx-100), Rand.Int(100, maxy-100)))
     end spawnGoblin
     
     proc spawnFireball(i : int)
-        if ^w.useMana(5) then
+        if ^w.useMana(10) then
             new m, upper(m)+1
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
@@ -437,12 +439,20 @@ module game
             end if
         end for
             w -> defUpdate
-            for i : 1..upper(m)
+            var c := ^level.getNear(^w.pos.x div 40, ^w.pos.y div 40)
+            for i : 1..9
+                var tmp := checkColl_tile(w, c(i))
+            end for
+        for i : 1..upper(m)
             if m(i) -> isAlive then
                 m(i) -> defUpdate
                 var tmp := checkColl(m(i), w)
                 for j : i+1..upper(m)
                     var temp := checkColl(m(i), m(j))
+                end for
+                var a := ^level.getNear(^(m(i)).pos.x div 40, ^(m(i)).pos.y div 40)
+                for j : 1..9
+                    var temp := checkColl_tile(m(i), a(j))
                 end for
             end if
         end for
@@ -467,7 +477,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(3)
+game.initialize(1)
 
 loop
     Input.KeyDown (keys)
