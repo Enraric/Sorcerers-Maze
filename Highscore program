@@ -1,0 +1,549 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% High Score Program                   %
+% Programmed by Alexander McMorine III %
+% Work Started 25/11/2013              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+const * UP := chr (119)
+const * DOWN := chr (115)
+const * LEFT := chr (97)
+const * RIGHT := chr (100)
+const * SPACE := chr (32)
+var * keys : array char of boolean
+var * text := Font.New ("Serif:14")
+var * avgFont := Font.New ("Serif:32")
+var * lose : boolean := false
+var * title := Font.New ("Serif:48:Bold")
+var * small := Font.New ("Serif:28")
+var * timesec := 0
+var * exitvar : boolean := false
+var * exitloopy : boolean := false
+type * player : forward
+type * enemy : forward
+type * moveable : forward
+
+type scoredata :
+record
+    name : string (3)
+    scor : int
+end record
+
+var tempscore : scoredata
+var playerscore : scoredata
+var score : array 1 .. 10 of scoredata
+
+% Click Check Function Thing %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function clickCheck (x, y, x1, y1, x2, y2 : int) : boolean
+    result (x > x1) and (x < x2) and (y > y1) and (y < y2)
+end clickCheck
+
+% Reseting Scores to Defaults %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc reset
+    
+    for i : 1 .. 10
+        score(i).name := "CPU"
+        score(i).scor := 2500
+    end for
+        
+    var f1 : int
+    open : f1, "scores", write
+    for i : 1 .. 10
+        write : f1, score(i)
+    end for
+        close : f1
+    
+    cls
+    put "Reseting..."
+    delay (1000)
+    cls
+    
+end reset
+
+% Changing Entries to the High Score Table%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc change
+    var exitloop : boolean := false
+    var f1 : int
+    
+    cls
+    
+    put "Name" : 5, "Score"
+    for decreasing i : 10 .. 1
+        put score(i).name : 5 ..
+        put score(i).scor
+    end for
+        
+    put ""
+    put ""
+    put "Which row would you like to change?"
+    
+    var select : int
+    loop
+        get select
+        if select > 10 then
+            put "That is not an option"
+        else
+            put "Enter new name: "..
+            get score(11-select).name
+            put "Enter new score: "..
+            get score(11-select).scor
+                exitloop := true
+        end if
+        exit when exitloop = true
+    end loop
+    
+    exitloop := false
+    
+    open : f1, "scores", write
+    for decreasing i : 10 .. 1
+        write : f1, score(i)
+    end for
+        close : f1
+    
+    cls
+    put "Entering new data..."
+    delay (1000)
+    cls
+    
+end change
+
+%Sorting the High Scores %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc scoresort
+    
+    var temp : int
+    
+    var f1 : int
+    open : f1, "scores", read
+    for decreasing i : 10 .. 1
+        read : f1, score (i)
+    end for
+        close: f1
+    
+    for decreasing i : 10 .. 1
+        for decreasing j : 10 .. 2
+            if score(j).scor < score(j - 1).scor then
+                tempscore := score(j)
+                score(j) := score(j - 1)
+                score(j - 1) := tempscore
+            end if
+        end for
+    end for
+        
+    open : f1, "scores", write
+    for decreasing i : 10 .. 1
+        write : f1, score (i)
+    end for
+        close : f1
+    
+end scoresort
+
+% Admin Mode Menu %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc admin
+    
+    var s := 1
+    s := Window.Open ("graphics")
+    Window.Select (s)
+    
+    var select : int
+    var exitnow : boolean := false
+    var exitloop : boolean := false
+    
+    loop
+        
+        var f1 : int
+        open : f1, "scores", read
+        for decreasing i : 10 .. 1
+            read : f1, score (i)
+        end for
+            close: f1
+        
+        put "Name" : 5, "Score"
+        
+        for decreasing i : 10 .. 1
+            put score(i).name : 5 ..
+            put score(i).scor
+        end for
+            
+        put ""
+        put ""
+        
+        put "What would you like to do?"
+        put "1: Change    2: Sort    3: Reset    4: Quit"
+        
+        loop
+            
+            get select
+            if select = 1 then   
+                change
+                exitloop := true
+            elsif select = 2 then
+                scoresort
+                cls
+                exitloop := true
+            elsif select = 3 then
+                reset
+                exitloop := true
+            elsif select = 4 then
+                exitloop := true
+                exitnow := true
+            else
+                put "That was not an option"
+            end if
+            
+            exit when exitloop = true
+            
+        end loop
+        
+        exitloop := false
+        
+        exit when exitnow = true
+    end loop
+    
+    Window.Close (s)
+    
+end admin
+
+%The Letter Entering Bit %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc letterEnter
+    
+    var s := 1
+    s := Window.Open ("graphics:450;400")
+    drawfillbox(0, 0, 1000, 1000, black)
+    
+    var letter : int := 65
+    var finish : boolean := false
+    var x, y, button : int := 0
+    var lettercount : int := 0
+    
+    playerscore.name := ""
+    
+    Font.Draw ("High Score! Enter your name.", 10, 350, small, white)
+    
+    % Left Arrow
+    drawbox (100, 200, 150, 250, white)
+    drawline (140, 210, 120, 210, white)
+    drawline (120, 210, 110, 225, white)
+    drawline (110, 225, 120, 240, white)
+    drawline (120, 240, 140, 240, white)
+    drawline (140, 240, 140, 210, white)
+    
+    % Right Arrow
+    drawbox (300, 200, 350, 250, white)
+    drawline (310, 210, 330, 210, white)
+    drawline (330, 210, 340, 225, white)
+    drawline (340, 225, 330, 240, white)
+    drawline (330, 240, 310, 240, white)
+    drawline (310, 240, 310, 210, white)
+    
+    % Enter Box
+    drawbox (200, 100, 250, 150, white)
+    drawline (210, 140, 210, 110, white)
+    drawline (210, 110, 230, 110, white)
+    drawline (230, 110, 240, 115, white)
+    drawline (240, 115, 230, 120, white)
+    drawline (230, 120, 220, 120, white)
+    drawline (220, 120, 220, 140, white)
+    drawline (220, 140, 210, 140, white)
+    
+    Font.Draw (chr (letter), 200, 200, title, white)
+    
+    loop
+        buttonwait ("down", x, y, button, button)
+        if clickCheck (x, y, 100, 200, 150, 250) and letter > 65 and button = 1 then
+            letter -= 1
+            drawfillbox (180, 180, 270, 250, black)
+            Font.Draw (chr (letter), 200, 200, title, white)
+        end if
+        if clickCheck (x, y, 300, 200, 350, 250) and letter < 90 and button = 1 then
+            letter += 1
+            drawfillbox (180, 180, 270, 250, black)
+            Font.Draw (chr (letter), 200, 200, title, white)
+        end if
+        if clickCheck (x, y, 200, 100, 250, 150) and button = 1 then
+            playerscore.name := playerscore.name + chr (letter)
+            Font.Draw (playerscore.name, 150, 260, title, white)
+            lettercount += 1
+        end if
+        exit when lettercount = 3
+    end loop
+    
+    Window.Close (s)
+    
+end letterEnter
+
+%Stuff Pertaining to the High Score Bit %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc scorestuff
+    
+    var x, y, button : int := 0
+    
+    var f1 : int
+    open : f1, "scores", read
+    for decreasing i : 10 .. 1
+        read : f1, score (i)
+    end for
+        close: f1
+    
+    if playerscore.scor > score(10).scor then
+        score(10) := playerscore
+        letterEnter
+        scoresort
+    end if
+    
+    cls
+    
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("Name", 10, 550, title, white)
+    Font.Draw ("Score", 630, 550, title, white)
+    
+    for decreasing i : 10 .. 1
+        Font.Draw (score (i).name, 10, 45 * i + 35, avgFont, white)
+        Font.Draw (intstr (score (i).scor), 630, 45 * i + 35, avgFont, white)
+    end for
+        
+    drawbox (5, 5, 112, 25, white)
+    Font.Draw ("Admin mode", 10, 10, text, white)
+    
+    drawbox (295, 5, 463, 45, white)
+    Font.Draw ("Play Again" , 300, 13, small, white)
+    
+    drawbox (720, 5, 795, 45, white)
+    Font.Draw ("Quit" , 725, 13, small, white)
+    
+    View.Update
+    
+    loop
+        mousewhere (x, y, button)
+        if x > 5 and y > 5 and x < 112 and y < 25 and button = 1 then
+            admin
+        elsif x > 295 and x < 463 and y > 5 and y < 45 and button = 1 then
+            exitloopy := true
+        elsif x > 720 and x < 795 and y > 5 and y < 45 and button = 1 then
+            exitloopy := true
+            exitvar := true
+        end if
+        exit when exitloopy
+    end loop
+    
+    exitloopy := false
+    playerscore.scor := 0
+    playerscore.name := ""
+    
+end scorestuff
+
+%Game Over Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc gameover
+    cls
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("Game Over", 210, 300, title, white)
+    Font.Draw ("Score: " + intstr (timesec), 210, 200, title, white)
+    View.Update
+    delay (3000)
+end gameover
+
+%Item Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class _moveable
+    export draw, collide, setXY, x, y
+    var x, y : int
+    var health : real
+    var speed : int
+    
+    deferred proc draw
+    deferred proc collide(m : ^_moveable)
+    
+    proc setXY(nx, ny : int)
+        x := nx
+        y := ny
+    end setXY
+    
+end _moveable
+type * moveable : ^_moveable
+
+%Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class _player
+    inherit _moveable
+    export update
+    
+    %setXY(100, 100)
+    x := 100
+    y := 100
+    speed := 3
+    health := 200
+    
+    body proc collide
+        if timesec > 300 then
+            health -= 1
+        end if
+    end collide
+    
+    proc update        
+        if keys (UP) and y < maxy - 65 then
+            y += speed
+        elsif keys (DOWN) and y > 20 then
+            y -= speed
+        elsif keys (LEFT) and x > 20 then
+            x -= speed
+        elsif keys (RIGHT) and x < maxx - 20 then
+            x += speed
+        end if
+        if keys (SPACE) then
+        end if
+        if health <= 0 then
+            lose := true
+        end if
+    end update
+    
+    body proc draw
+        Pic.ScreenLoad ("mage_idle.bmp", x - 20, y - 20, picCopy)
+        
+        for i : 0 .. 3
+            Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
+        end for
+    end draw
+    
+end _player
+type * player : ^_player
+
+% Goblin Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class _enemy
+    inherit _moveable
+    export update
+    
+    %setXY(300, 300)
+    x := Rand.Int (100, 700)
+    y := Rand.Int (100, 500)
+    health := 1.0
+    speed := 1
+    var randmove := Rand.Int (1, 7)
+    var step := 0
+    
+    proc update(p : player)   
+        step += 1
+        if step = Rand.Int (50, 150) then
+            randmove := Rand.Int(1, 7)
+            step := 0
+        end if
+        if step = 151 then
+            step := 0
+        end if
+        case randmove of
+        label 1:
+            y += speed
+        label 2:
+            y += speed
+            x += speed
+        label 3:
+            x += speed
+        label 4:
+            x += speed
+            y -= speed
+        label 5:
+            y -= speed
+        label 6:
+            y -= speed
+            x -= speed
+        label 7:
+            x -= speed
+        label 8:
+            x -= speed
+            y += speed
+        end case
+        if x = maxx - 25 then
+            randmove := 7
+        end if
+        if x = 25 then
+            randmove := 3
+        end if
+        if y = 25 then
+            randmove := 1
+        end if
+        if y = maxy - 65 then
+            randmove := 5
+        end if
+    end update
+    
+    body proc collide
+        
+    end collide
+    
+    body proc draw
+        Pic.ScreenLoad ("troll_idle.bmp", x - 20, y - 20, picCopy)
+    end draw
+    
+end _enemy
+type * enemy : ^_enemy
+
+proc checkColl(m1, m2 : moveable)
+    if abs(^m1.x - ^m2.x) <= 40 and abs(^m1.y - ^m2.y) <= 40 then
+        ^m1.collide(m2)
+        ^m2.collide(m1)
+    end if
+end checkColl
+
+
+%Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc game
+    View.Set ("graphics:800;600,offscreenonly,nobuttonbar")
+    var e : array 1 .. 50 of enemy
+    for i : 1 .. 50
+        new e(i)
+    end for
+        var p : player
+    new p
+    
+    var t := Time.Elapsed
+    
+    loop
+        Draw.FillBox (0, maxy-40, maxx, maxy, black)
+        Font.Draw ("Health", 410, maxy-25, text, white)
+        Font.Draw (intstr(timesec), maxx-(length(intstr(timesec))*10), maxy-25, text, white)
+        
+        Input.KeyDown (keys)
+        p -> update
+        p -> draw
+        for i : 1 .. 50
+            e(i) -> update(p)
+            e(i) -> draw
+            checkColl(p, e(i))
+        end for
+            
+        timesec := (Time.Elapsed - t) div 10
+        
+        if timesec < 301 then
+            Font.Draw ("Avoid the Green Squares!", 50, 320, title, black)
+            Font.Draw ("Move with WASD", 130, 260, title, black)
+        end if
+        
+        View.Update
+        
+        cls
+        
+        exit when lose
+        
+        Time.DelaySinceLast (16)
+    end loop
+    
+    playerscore.scor := timesec
+    
+end game
+
+%Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+loop
+    game
+    gameover
+    scorestuff
+    exit when exitvar
+end loop
