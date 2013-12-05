@@ -30,7 +30,6 @@ record
     scor : int
 end record
 
-var tempscore : scoredata
 var playerscore : scoredata
 var score : array 1 .. 10 of scoredata
 
@@ -72,7 +71,7 @@ proc change
     cls
     
     put "Name" : 5, "Score"
-    for decreasing i : 10 .. 1
+    for i : 1 .. 10
         put score(i).name : 5 ..
         put score(i).scor
     end for
@@ -88,9 +87,9 @@ proc change
             put "That is not an option"
         else
             put "Enter new name: "..
-            get score(11-select).name
+            get score(select).name
             put "Enter new score: "..
-            get score(11-select).scor
+            get score(select).scor
                 exitloop := true
         end if
         exit when exitloop = true
@@ -99,7 +98,7 @@ proc change
     exitloop := false
     
     open : f1, "scores", write
-    for decreasing i : 10 .. 1
+    for i : 1 .. 10
         write : f1, score(i)
     end for
         close : f1
@@ -117,25 +116,19 @@ proc scoresort
     
     var temp : int
     
-    var f1 : int
-    open : f1, "scores", read
-    for decreasing i : 10 .. 1
-        read : f1, score (i)
-    end for
-        close: f1
-    
-    for decreasing i : 10 .. 1
-        for decreasing j : 10 .. 2
-            if score(j).scor < score(j - 1).scor then
-                tempscore := score(j)
-                score(j) := score(j - 1)
-                score(j - 1) := tempscore
-            end if
-        end for
-    end for
+-    for i : 1 .. 10
+-        for decreasing j : 10 .. 2
+-            if score(j).scor > score(j - 1).scor then
+-                var tempscore := score(j)
+-                score(j) := score(j - 1)
+-                score(j - 1) := tempscore
+-            end if
+-        end for
+-    end for
         
+    var f1 : int    
     open : f1, "scores", write
-    for decreasing i : 10 .. 1
+    for i : 1 .. 10
         write : f1, score (i)
     end for
         close : f1
@@ -158,14 +151,14 @@ proc admin
         
         var f1 : int
         open : f1, "scores", read
-        for decreasing i : 10 .. 1
+        for i : 1 .. 10
             read : f1, score (i)
         end for
             close: f1
         
         put "Name" : 5, "Score"
         
-        for decreasing i : 10 .. 1
+        for i : 1 .. 10
             put score(i).name : 5 ..
             put score(i).scor
         end for
@@ -267,7 +260,7 @@ proc letterEnter
             Font.Draw (chr (letter), 200, 200, title, white)
         end if
         if clickCheck (x, y, 200, 100, 250, 150) and button = 1 then
-            playerscore.name := playerscore.name + chr (letter)
+            playerscore.name += chr (letter)
             Font.Draw (playerscore.name, 150, 260, title, white)
             lettercount += 1
         end if
@@ -286,14 +279,14 @@ proc scorestuff
     
     var f1 : int
     open : f1, "scores", read
-    for decreasing i : 10 .. 1
+    for i : 1 .. 10
         read : f1, score (i)
     end for
         close: f1
     
     if playerscore.scor > score(10).scor then
-        score(10) := playerscore
         letterEnter
+        score(10) := playerscore
         scoresort
     end if
     
@@ -303,9 +296,9 @@ proc scorestuff
     Font.Draw ("Name", 10, 550, title, white)
     Font.Draw ("Score", 630, 550, title, white)
     
-    for decreasing i : 10 .. 1
-        Font.Draw (score (i).name, 10, 45 * i + 35, avgFont, white)
-        Font.Draw (intstr (score (i).scor), 630, 45 * i + 35, avgFont, white)
+    for i : 1 .. 10
+        Font.Draw (score (11-i).name, 10, 45 * i + 35, avgFont, white)
+        Font.Draw (intstr (score (11-i).scor), 630, 45 * i + 35, avgFont, white)
     end for
         
     drawbox (5, 5, 112, 25, white)
@@ -404,7 +397,7 @@ class _player
     end update
     
     body proc draw
-        Pic.ScreenLoad ("mage_idle.bmp", x - 20, y - 20, picCopy)
+        Pic.ScreenLoad ("Graphics/mage_idle.bmp", x - 20, y - 20, picCopy)
         
         for i : 0 .. 3
             Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
@@ -478,7 +471,7 @@ class _enemy
     end collide
     
     body proc draw
-        Pic.ScreenLoad ("troll_idle.bmp", x - 20, y - 20, picCopy)
+        Pic.ScreenLoad ("Graphics/superdoor_open.bmp", x - 20, y - 20, picCopy)
     end draw
     
 end _enemy
@@ -534,7 +527,8 @@ proc game
         
         Time.DelaySinceLast (16)
     end loop
-    
+
+    lose := false
     playerscore.scor := timesec
     
 end game
