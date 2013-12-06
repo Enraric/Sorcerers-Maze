@@ -477,11 +477,25 @@ module game
     end draw
 end game
 
+
+
+module ledit
+    export all
+    
+    var m : flexible array 1..0 of ^moveable
+    var level : ^room
+    
+    fcn openl(lname : string) : int
+        var f : int
+        open : f, lname, read
+    end openl
+end ledit
+
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(1)
+game.initialize(1) 
 
 loop
     Input.KeyDown (keys)
