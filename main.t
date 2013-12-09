@@ -196,7 +196,7 @@ class * wizard
     inherit moveable
     export useMana
     kind := mode.neutral
-    pos := newP(100, 100)
+    pos := newP(maxx div 2, 260)
     pic := wizIdle
     speed := 3
     health := 100.0
@@ -352,6 +352,7 @@ end room
 class * door
     inherit tile
     pic := doorPic
+    solid := true
     var filename : string    
     
 end door
@@ -391,10 +392,10 @@ module game
         View.Update
     end gameover
     
-    proc spawnGoblin(x, y : int)
+    proc spawnGoblin(pos : point)
         new m, upper(m)+1
         new goblin, m(upper(m))
-        m(upper(m)) -> setXY(newP(Rand.Int(100, maxx-100), Rand.Int(100, maxy-100)))
+        m(upper(m)) -> setXY(pos)
     end spawnGoblin
     
     proc spawnFireball(i : int)
@@ -405,7 +406,7 @@ module game
             m(upper(m)) -> setXY(^w.pos)
         end if
     end spawnFireball
-    
+
     proc loadLevel(filename : string)
         var f : int
         open : f, "Levels/"+filename+".txt", get
@@ -419,6 +420,9 @@ module game
                     new wall, t
                 label 'd':
                     new door, t
+                label 'g':
+                    new tile, t
+                    spawnGoblin(newP(20+x*40, 20+y*40))
                 label:
                     new tile, t
                 end case
@@ -427,13 +431,10 @@ module game
         end for
     end loadLevel
     
-    proc initialize(levelName : string, numGob : int)
+    proc initialize(levelName : string)
         new w
         new level
         loadLevel(levelName)
-        for i : 1..numGob
-            spawnGoblin
-        end for
             ^level.initialize
     end initialize
     
@@ -454,9 +455,6 @@ module game
     end sweep
     
     proc update
-        if keys('c') then
-            spawnGoblin
-        end if
         for i : 1..4
             if keys(arrowKeys(i)) then
                 if not shot(i) then
@@ -508,7 +506,7 @@ end game
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize("testroom",1) 
+game.initialize("testroom") 
 
 loop
     Input.KeyDown (keys)
