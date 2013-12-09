@@ -53,13 +53,23 @@ fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
         result a
 end loadPics
 
+fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
+    var a : array 1..4 of array 1..2 of int
+    for i : 1..4
+        for j : 1..2
+            a(i)(j) := Pic.FileNew("Graphics/"+name+"_"+intstr(i)+"_"+intstr(j)+".bmp")
+        end for
+    end for
+        result a
+end loadPics2
+
 %var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
 var * doorPic := Pic.FileNew("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew("Graphics/ground.bmp")
 var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove := loadPics("mage")
-var * gobMove := loadPics("troll")
+var * wizMove := loadPics2("mage")
+var * gobMove := loadPics2("troll")
 var * fire := loadPics("fire")
 
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -309,14 +319,6 @@ class * room
     
     var map : array 0..19, 0..12 of ^tile
     
-    proc initialize
-        for x : 0..19
-            for y : 0..12
-                map(x, y) -> setXY(newP(20+x*40, 20+y*40))
-            end for
-        end for
-    end initialize
-    
     fcn getNear(x, y : int) : array 1..9 of ^tile
         var a : array 1..9 of ^tile
         var c := 1
@@ -435,7 +437,6 @@ module game
         new w
         new level
         loadLevel(levelName)
-            ^level.initialize
     end initialize
     
     proc sweep
