@@ -312,11 +312,6 @@ class * room
     proc initialize
         for x : 0..19
             for y : 0..12
-                if y = 0 or x = 0 or y = 12 or x = 19 then
-                    new wall, map(x, y)
-                else
-                    new tile, map(x, y)
-                end if
                 map(x, y) -> setXY(newP(20+x*40, 20+y*40))
             end for
         end for
@@ -352,14 +347,15 @@ class * room
     end draw
 end room
 
+% Door Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * door
     inherit tile
     pic := doorPic
-    var nextLevel : ^room
+    var filename : string    
     
 end door
-
+    
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module game
@@ -410,9 +406,31 @@ module game
         end if
     end spawnFireball
     
-    proc initialize(numGob : int)
+    proc loadLevel(filename : string)
+        var f : int
+        open : f, "Levels/"+filename+".txt", get
+        for decreasing y : 12..0
+            var line : string
+            get : f, line : *
+            for x : 0..19
+                var t : ^tile
+                case line(x+1) of
+                label 'w':
+                    new wall, t
+                label ' ':
+                    new tile, t
+                label 'd':
+                    new door, t
+                end case
+                level -> setTile(x, y, t)
+            end for
+        end for
+    end loadLevel
+    
+    proc initialize(levelName : string, numGob : int)
         new w
         new level
+        loadLevel(levelName)
         for i : 1..numGob
             spawnGoblin
         end for
@@ -486,25 +504,11 @@ module game
     end draw
 end game
 
-% Level Editor %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-module ledit
-    export all
-    
-    var m : flexible array 1..0 of ^moveable
-    var level : ^room
-    
-    fcn openl(lname : string) : int
-        var f : int
-        open : f, lname, read
-    end openl
-end ledit
-
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:800;580,offscreenonly,nobuttonbar")
 
-game.initialize(1) 
+game.initialize("testroom",1) 
 
 loop
     Input.KeyDown (keys)
