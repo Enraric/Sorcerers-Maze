@@ -391,7 +391,7 @@ module game
         View.Update
     end gameover
     
-    proc spawnGoblin
+    proc spawnGoblin(x, y : int)
         new m, upper(m)+1
         new goblin, m(upper(m))
         m(upper(m)) -> setXY(newP(Rand.Int(100, maxx-100), Rand.Int(100, maxy-100)))
@@ -417,10 +417,10 @@ module game
                 case line(x+1) of
                 label 'w':
                     new wall, t
-                label ' ':
-                    new tile, t
                 label 'd':
                     new door, t
+                label:
+                    new tile, t
                 end case
                 level -> setTile(x, y, t)
             end for
