@@ -172,6 +172,16 @@ class * item
     end draw
 end item
 
+% Potion Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * potion
+    inherit item
+    
+    body proc use
+        
+    end use
+end potion
+
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
@@ -352,7 +362,7 @@ end room
 % Door Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * door
-    inherit tile
+        inherit tile
     pic := doorPic
     solid := true
     var filename : string    
@@ -408,7 +418,7 @@ module game
             m(upper(m)) -> setXY(^w.pos)
         end if
     end spawnFireball
-
+    
     proc loadLevel(filename : string)
         var f : int
         open : f, "Levels/"+filename+".txt", get
