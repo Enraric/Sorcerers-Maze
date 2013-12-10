@@ -315,7 +315,7 @@ end goblin
 % Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * room
-    export getNear, getTile, setTile, draw, initialize, map
+    export getNear, getTile, setTile, draw, map
     
     var map : array 0..19, 0..12 of ^tile
     
