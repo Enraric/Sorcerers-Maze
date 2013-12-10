@@ -266,7 +266,7 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
