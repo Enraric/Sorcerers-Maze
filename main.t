@@ -153,7 +153,7 @@ class * tile
     pic := groundPic
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
     end draw
 end tile
 
