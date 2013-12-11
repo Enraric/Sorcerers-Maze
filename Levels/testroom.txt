@@ -22,7 +22,5 @@ l = locked door
 s = superdoor
 k = key
 z = superkey
-h = health potion
-m = manna potion
 g = goblin
   = ground
