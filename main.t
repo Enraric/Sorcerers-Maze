@@ -5,6 +5,8 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+const * SPRTSZ := 32
+
 % Stuff for Colision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 type * point:
@@ -47,7 +49,7 @@ fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
     end for
         for i : 2..4
         for j : 1..2
-            a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, 20, 20)
+            a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, SPRTSZ div 2, SPRTSZ div 2)
         end for
     end for
         result a
@@ -153,7 +155,7 @@ class * tile
     pic := groundPic
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
     end draw
 end tile
 
@@ -206,7 +208,7 @@ class * fireball
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
     end draw
 end fireball
 
@@ -216,7 +218,7 @@ class * wizard
     inherit moveable
     export useMana
     kind := mode.neutral
-    pos := newP(maxx div 2, 260)
+    pos := newP(maxx div 2, (maxy-60) div 2)
     pic := wizIdle
     speed := 3
     health := 100.0
@@ -266,7 +268,7 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picMerge)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -318,7 +320,7 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-20, pos.y-20, picCopy)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
     end draw
 end goblin
 
@@ -347,7 +349,7 @@ class * room
     
     proc setTile(x, y : int, newTile : ^tile)
         map(x, y) := newTile
-        map(x, y) -> setXY(newP(20+x*40, 20+y*40))
+        map(x, y) -> setXY(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
     end setTile
     
     proc draw
@@ -381,7 +383,7 @@ module game
     var level : ^room
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
-        var c := abs(^m1.pos.x - ^m2.pos.x) <= 40 and abs(^m1.pos.y - ^m2.pos.y) <= 40
+        var c := abs(^m1.pos.x - ^m2.pos.x) <= SPRTSZ and abs(^m1.pos.y - ^m2.pos.y) <= SPRTSZ
         if c then
             ^m1.defCollide(m2)
             ^m2.defCollide(m1)
@@ -390,7 +392,7 @@ module game
     end checkColl
     
     fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
-        var c := abs(^m.pos.x - (^s.pos.x)) <= 40 and abs(^m.pos.y - (^s.pos.y)) <= 40
+        var c := abs(^m.pos.x - (^s.pos.x)) <= SPRTSZ and abs(^m.pos.y - (^s.pos.y)) <= SPRTSZ
         if c then
             ^m.defCollide(s)
         end if
@@ -434,7 +436,7 @@ module game
                     new door, t
                 label 'g':
                     new tile, t
-                    spawnGoblin(newP(20+x*40, 20+y*40))
+                    spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -477,7 +479,7 @@ module game
             end if
         end for
             w -> defUpdate
-        var c := ^level.getNear(^w.pos.x div 40, ^w.pos.y div 40)
+        var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ)
         for i : 1..9
             var tmp := checkColl_tile(w, c(i))
         end for
@@ -490,7 +492,7 @@ module game
                         var temp := checkColl(m(i), m(j))
                     end if
                 end for
-                    var a := ^level.getNear(^(m(i)).pos.x div 40, ^(m(i)).pos.y div 40)
+                    var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ)
                 for j : 1..9
                     var temp := checkColl_tile(m(i), a(j))
                 end for
@@ -515,7 +517,7 @@ end game
 
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-View.Set("graphics:800;580,offscreenonly,nobuttonbar")
+View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
 
 game.initialize("testroom") 
 
