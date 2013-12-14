@@ -264,6 +264,12 @@ class * wizard
             if keys (' ') then
             heal
         end if
+        if keys ('c') and mana < 100 then
+            mana := 100
+        end if
+        if keys ('e') and health < 100 then
+            health := 100
+        end if
         lose := health <= 0
     end update
     
