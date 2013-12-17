@@ -371,6 +371,7 @@ end room
 
 class * door
         inherit tile
+    export var filename
     pic := doorPic
     solid := true
     var filename : string    
@@ -500,7 +501,9 @@ module game
                 end for
                     var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ)
                 for j : 1..9
-                    var temp := checkColl_tile(m(i), a(j))
+                    if checkColl_tile(m(i), a(j)) and objectclass(a(j)) = door then
+                        initialize(a(j) -> filename)
+                    end if
                 end for
             end if
         end for
