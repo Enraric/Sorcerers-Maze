@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sorcerer's Maze                      %
 % Programmed by Alexander McMorine III %
+% and Ian Frosst                       %
 % Work Started 11/11/2013              %
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -106,6 +107,7 @@ class * moveable
     inherit object
     export defUpdate, defCollide, move, var isAlive, var limit, var direct
     solid := true
+    var step := 0    
     var speed : int
     var direct : 1..4
     var health : real
@@ -139,6 +141,7 @@ class * moveable
         for i : 1..4
             limit(i) := false
         end for
+        step += 1
     end defUpdate
     
     proc defCollide(m : ^object)
@@ -151,8 +154,10 @@ end moveable
 
 class * tile
     inherit object
+    export var filename
     solid := false
     pic := groundPic
+    var filename : string    
     
     body proc draw
         Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
@@ -198,7 +203,7 @@ class * fireball
         if pos.x > maxx or pos.x < 0 or pos.y > maxy or pos.y < 0 then
             isAlive := false
         end if
-        pic := fire(direct)(1)
+        pic := fire(direct)(((step div 10) mod 2)+1)
     end update
     
     body proc collide
@@ -258,7 +263,7 @@ class * wizard
         for i : 1..4
             if keys(wdsa(i)) then
                 move(i)
-                pic := wizMove(i)(1)
+                pic := wizMove(i)(((step div 10) mod 2)+1)
             end if
         end for
             if keys (' ') then
@@ -309,13 +314,12 @@ class * goblin
     speed := 2
     damage := 0.5
     var randmove := Rand.Int (0, 4)
-    var step := 0
     var t := w
     
     body proc update
         direct := getDir(pos, ^t.pos)
         move(direct)
-        pic := gobMove(direct)(1)
+        pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
     end update
     
@@ -367,17 +371,22 @@ class * room
     end draw
 end room
 
-% Door Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Door Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * door
         inherit tile
-    export var filename
     pic := doorPic
     solid := true
-    var filename : string    
-    
 end door
-
+    
+class * lockDoor
+        inherit door
+end lockDoor
+    
+class * superDoor
+        inherit lockDoor
+end superDoor
+    
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 module game
@@ -399,7 +408,7 @@ module game
     end checkColl
     
     fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
-        var c := abs(^m.pos.x - (^s.pos.x)) <= SPRTSZ and abs(^m.pos.y - (^s.pos.y)) <= SPRTSZ
+        var c := abs(^m.pos.x - ^s.pos.x) <= SPRTSZ and abs(^m.pos.y - ^s.pos.y) <= SPRTSZ
         if c then
             ^m.defCollide(s)
         end if
@@ -429,8 +438,11 @@ module game
     end spawnFireball
     
     proc loadLevel(filename : string)
+        new m, 0
+        w -> setXY(newP(maxx div 2, maxy div 2))
         var f : int
-        open : f, "Levels/"+filename+".txt", get
+        var d : flexible array 1..0 of ^door
+            open : f, "Levels/"+filename+".txt", get
         for decreasing y : 12..0
             var line : string
             get : f, line : *
@@ -441,6 +453,16 @@ module game
                     new wall, t
                 label 'd':
                     new door, t
+                    new d, upper(d) + 1
+                    d(upper(d)) := t
+                label 'l':
+                    new lockDoor, t
+                    new d, upper(d) + 1
+                    d(upper(d)) := t
+                label 's':
+                    new superDoor, t
+                    new d, upper(d) + 1
+                    d(upper(d)) := t
                 label 'g':
                     new tile, t
                     spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
@@ -449,6 +471,11 @@ module game
                 end case
                 level -> setTile(x, y, t)
             end for
+        end for
+            for i : 1..upper(d)
+            var fname : string
+            get : f, fname
+            d(i) -> filename := fname
         end for
     end loadLevel
     
@@ -488,7 +515,9 @@ module game
             w -> defUpdate
         var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ)
         for i : 1..9
-            var tmp := checkColl_tile(w, c(i))
+            if checkColl_tile(w, c(i)) and objectclass(c(i)) >= door then
+                loadLevel(c(i) -> filename)
+            end if
         end for
             for i : 1..upper(m)
             if m(i) -> isAlive then
@@ -501,9 +530,7 @@ module game
                 end for
                     var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ)
                 for j : 1..9
-                    if checkColl_tile(m(i), a(j)) and objectclass(a(j)) = door then
-                        initialize(a(j) -> filename)
-                    end if
+                    var temp := checkColl_tile(m(i), a(j))
                 end for
             end if
         end for
@@ -528,7 +555,7 @@ end game
 
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
 
-game.initialize("testroom") 
+game.initialize("C3") 
 
 loop
     Input.KeyDown (keys)
