@@ -41,6 +41,14 @@ fcn * getDir(p1, p2 : point) : 1..4
     end if
 end getDir
 
+fcn * getText : string
+    var t := Window.Open("text:2;1,nobuttonbar")
+    var text : string
+    get text : *
+    Window.Close(t)
+    result text
+end getText
+
 % Loading Game Sprites %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
@@ -141,7 +149,7 @@ class * moveable
         for i : 1..4
             limit(i) := false
         end for
-        step += 1
+            step += 1
     end defUpdate
     
     proc defCollide(m : ^object)
@@ -408,7 +416,7 @@ module game
     end checkColl
     
     fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
-        var c := abs(^m.pos.x - ^s.pos.x) <= SPRTSZ and abs(^m.pos.y - ^s.pos.y) <= SPRTSZ
+        var c := abs(^m.pos.x - ^s.pos.x) <= SPRTSZ and abs(^m.pos.y - ^s.pos.y) <= SPRTSZ and ^s.solid
         if c then
             ^m.defCollide(s)
         end if
@@ -438,7 +446,10 @@ module game
     end spawnFireball
     
     proc loadLevel(filename : string)
-        new m, 0
+        for i : 1..upper(m)
+            free m(i)
+        end for
+            new m, 0
         w -> setXY(newP(maxx div 2, maxy div 2))
         var f : int
         var d : flexible array 1..0 of ^door
@@ -477,6 +488,7 @@ module game
             get : f, fname
             d(i) -> filename := fname
         end for
+            close : f
     end loadLevel
     
     proc initialize(levelName : string)
@@ -502,6 +514,9 @@ module game
     end sweep
     
     proc update
+        if keys('l') then
+            loadLevel(getText)
+        end if
         for i : 1..4
             if keys(arrowKeys(i)) then
                 if not shot(i) then
