@@ -216,7 +216,7 @@ class * fireball
     end update
     
     body proc collide
-        if ^m.kind not= mode.neutral and ^m.solid then
+        if ^m.kind not= mode.neutral and ^m.solid and getDir(pos, ^m.pos) = direct then
             isAlive := false
         end if
     end collide
