@@ -41,8 +41,9 @@ fcn * getDir(p1, p2 : point) : 1..4
     end if
 end getDir
 
-fcn * getText : string
+fcn * getText(s : string) : string
     var t := Window.Open("text:2;1,nobuttonbar")
+    put s
     var text : string
     get text : *
     Window.Close(t)
@@ -515,7 +516,7 @@ module game
     
     proc update
         if keys('l') then
-            loadLevel(getText)
+            loadLevel(getText(""))
         end if
         for i : 1..4
             if keys(arrowKeys(i)) then
