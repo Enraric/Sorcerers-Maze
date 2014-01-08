@@ -567,6 +567,23 @@ module game
     end draw
 end game
 
+% Pause Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc pausescreen
+    var asdasf := Font.New ("Sans:48:Bold")
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("PAUSED", 330, 330, asdasf, white)
+    View.Update
+    delay(100)
+    loop
+        Input.KeyDown(keys)
+        if keys ('p') then
+            delay(50)
+            exit
+        end if
+    end loop
+end pausescreen
+
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
@@ -576,6 +593,10 @@ game.initialize("C3")
 loop
     Input.KeyDown (keys)
     game.update
+    if keys ('p') then
+        pausescreen
+        delay (50)
+    end if
     game.draw
     View.Update
     cls
