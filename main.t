@@ -129,48 +129,38 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, var isAlive, var limit, var direct
+    export defUpdate, defCollide, move, var isAlive, var direct, var dist
     solid := true
     var step := 0    
-    var speed : int
-    var direct : 1..4
+    var speed, dist := 100
+    var direct : 1..4 := 1
     var health : real
     var isAlive := true
-    var limit : array 1..4 of boolean := init(false, false, false, false)
     
-    proc move_unckecked(dir : 1..4)
+    proc move(dir : 1..4, s : int)
         case dir of
         label 1:
-            pos.y += speed
+            pos.y += s
         label 2:
-            pos.x += speed
+            pos.x += s
         label 3:
-            pos.y -= speed
+            pos.y -= s
         label 4:
-            pos.x -= speed
+            pos.x -= s
         end case
-    end move_unckecked
-    
-    proc move(dir : 1..4)
-        if not limit(dir) then
-            move_unckecked(dir)
-        end if
     end move
     
     deferred proc update
     deferred proc collide(m : ^object)
     
     proc defUpdate
-        update
-        for i : 1..4
-            limit(i) := false
-        end for
-            step += 1
+        update        
+        move(direct, min(speed, dist))
+        step += 1
     end defUpdate
     
     proc defCollide(m : ^object)
         collide(m)
-        limit(getDir(pos, ^m.pos)) := ^m.solid
     end defCollide
 end moveable
 
@@ -217,13 +207,12 @@ end potion
 
 class * fireball
     inherit moveable    
-    speed := 5
+    speed := 8
     damage := 50.0
     kind := mode.friend
     solid := false
     
     body proc update
-        move(direct)
         if pos.x > maxx or pos.x < 0 or pos.y > maxy or pos.y < 0 then
             isAlive := false
         end if
@@ -249,7 +238,7 @@ class * wizard
     kind := mode.neutral
     pos := newP(maxx div 2, (maxy-60) div 2)
     pic := wizIdle
-    speed := 3
+    var mSpeed := 4
     health := 100.0
     var mana := 100.0
     var items : flexible array 1..0 of ^item
@@ -284,9 +273,11 @@ class * wizard
             mana += 0.1
         end if
         pic := wizIdle
+        speed := 0
         for i : 1..4
             if keys(wdsa(i)) then
-                move(i)
+                direct := i
+                speed := mSpeed
                 pic := wizMove(i)(((step div 10) mod 2)+1)
                 exit
             end if
@@ -343,7 +334,6 @@ class * goblin
     
     body proc update
         direct := getDir(pos, ^t.pos)
-        move(direct)
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
     end update
