@@ -1,3 +1,18 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TO DO LIST (in no particular order) %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Spawning at correct door            %
+% Locking doors + keys                %
+% Superdoors + Superkeys              %
+% Colision                            %
+% Goblin AI + arrows                  %
+% Goblin Mother                       %
+% Main Menu                           %
+% High Scores                         %
+% Win Conditions                      %
+% Music / sound effects (?)           %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sorcerer's Maze                      %
 % Programmed by Alexander McMorine III %
