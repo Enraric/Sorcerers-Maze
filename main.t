@@ -273,6 +273,7 @@ class * wizard
             if keys(wdsa(i)) then
                 move(i)
                 pic := wizMove(i)(((step div 10) mod 2)+1)
+                exit
             end if
         end for
             if keys (' ') then
