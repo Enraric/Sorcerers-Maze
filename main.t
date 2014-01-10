@@ -22,6 +22,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const * SPRTSZ := 48
+var * score : int := 0
+var step : int := 0
 
 % Stuff for Collision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -336,6 +338,9 @@ class * goblin
         direct := getDir(pos, ^t.pos)
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
+        if isAlive = false then
+            score -= 10
+        end if
     end update
     
     body proc collide
@@ -433,7 +438,7 @@ module game
     proc gameover
         cls
         drawfillbox (0, 0, maxx, maxy, black)
-        Font.Draw ("Game Over", 250, 300, title, white)
+        Font.Draw ("Game Over", 300, 350, title, white)
         View.Update
     end gameover
     
@@ -603,10 +608,19 @@ loop
         pausescreen
         delay (50)
     end if
+    if step = 4 then
+        score += 1
+        step := 0
+    end if
+    if score < 0 then
+        score := 0
+    end if
     game.draw
+    put "SCORE: ", score
     View.Update
     cls
     Time.DelaySinceLast (16)
+    step += 1
     exit when lose
 end loop
 
