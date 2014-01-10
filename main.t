@@ -575,6 +575,7 @@ module game
             end if
         end for
             w -> draw
+        Font.Draw (intstr(score), maxx-(length(intstr(score))*10), maxy-25, text, white)
     end draw
 end game
 
@@ -616,7 +617,6 @@ loop
         score := 0
     end if
     game.draw
-    put "SCORE: ", score
     View.Update
     cls
     Time.DelaySinceLast (16)
