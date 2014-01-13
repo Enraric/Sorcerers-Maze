@@ -132,10 +132,10 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, var isAlive, var direct, var dist
+    export defUpdate, defCollide, move, var isAlive, var direct
     solid := true
     var step := 0    
-    var speed, dist := 100
+    var speed := 0
     var direct : 1..4 := 1
     var health : real
     var isAlive := true
@@ -158,11 +158,12 @@ class * moveable
     
     proc defUpdate
         update        
-        move(direct, min(speed, dist))
+        move(direct, speed)
         step += 1
     end defUpdate
     
     proc defCollide(m : ^object)
+        move(direct, -(speed))
         collide(m)
     end defCollide
 end moveable
@@ -460,29 +461,12 @@ module game
         end if
     end spawnFireball
     
-    proc setDist(m : ^moveable, t : array 1..3 of ^tile)
-        var a : array 1..3 of int
-        if ^m.direct = 1 or ^m.direct = 3 then
-            for i : 1..3
-                a(i) := abs(^m.pos.x - ^(t(i)).pos.x)
-            end for
-            else
-            for i : 1..3
-                a(i) := abs(^m.pos.y - ^(t(i)).pos.y)
-            end for
-        end if
-        if ^(t(1)).solid or ^(t(2)).solid or ^(t(3)).solid then
-            ^m.dist := min(a(1), min(a(2), a(3)))
-        else
-            ^m.dist := 100            
-        end if
-    end setDist
-    
     proc loadLevel(filename : string)
         for i : 1..upper(m)
             free m(i)
         end for
             new m, 0
+        % Change this to spawn near doors
         w -> setXY(newP(maxx div 2, maxy div 2))
         var f : int
         var d : flexible array 1..0 of ^door
@@ -526,6 +510,7 @@ module game
     
     proc initialize(levelName : string)
         new w
+        
         new level
         loadLevel(levelName)
     end initialize
@@ -562,10 +547,11 @@ module game
         end for
             w -> defUpdate
         var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ, ^w.direct)
-        setDist(w, c)
         for i : 1..3
-            if checkColl_tile(w, c(i)) and objectclass(c(i)) >= door then
-                loadLevel(c(i) -> filename)
+            if checkColl_tile(w, c(i)) then
+                if objectclass(c(i)) >= door then
+                    loadLevel(c(i) -> filename)
+                end if
             end if
         end for
             for i : 1..upper(m)
@@ -578,7 +564,6 @@ module game
                     end if
                 end for
                     var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ, ^(m(i)).direct)
-                setDist(m(i), a)
                 for j : 1..3
                     var temp := checkColl_tile(m(i), a(j))
                 end for
@@ -640,7 +625,6 @@ loop
         score := 0
     end if
     game.draw
-    put ^w.dist
     View.Update
     cls
     Time.DelaySinceLast (16)
