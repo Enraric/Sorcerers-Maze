@@ -421,6 +421,7 @@ module game
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var m : flexible array 1..0 of ^moveable
     var level : ^room
+    var lastlevet : int := 0
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= SPRTSZ and abs(^m1.pos.y - ^m2.pos.y) <= SPRTSZ
