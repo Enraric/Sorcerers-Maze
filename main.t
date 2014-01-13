@@ -362,16 +362,18 @@ class * room
     
     var map : array 0..19, 0..12 of ^tile
     
-    fcn getNear(x, y : int) : array 1..9 of ^tile
-        var a : array 1..9 of ^tile
-        var c := 1
-        for xind : -1..1
-            for yind : -1..1
-                a(c) := map(x+xind, y+yind)
-                c += 1
+    fcn getNear(x, y : int, dir : 1..4) : array 1..3 of ^tile
+        var a : array 1..3 of ^tile
+        if dir = 1 or dir = 3 then
+            for i : 1..3
+                a(i) := map((x-2)+i,(y+2)-dir)
             end for
-        end for
-            result a
+            else
+            for i : 1..3
+                a(i) := map((x+3)-dir,(y-1)+i)
+            end for
+        end if
+        result a
     end getNear
     
     fcn getTile(x, y : int) : ^tile
@@ -458,6 +460,24 @@ module game
         end if
     end spawnFireball
     
+    proc setDist(m : ^moveable, t : array 1..3 of ^tile)
+        var a : array 1..3 of int
+        if ^m.direct = 1 or ^m.direct = 3 then
+            for i : 1..3
+                a(i) := abs(^m.pos.x - ^(t(i)).pos.x)
+            end for
+            else
+            for i : 1..3
+                a(i) := abs(^m.pos.y - ^(t(i)).pos.y)
+            end for
+        end if
+        if ^(t(1)).solid or ^(t(2)).solid or ^(t(3)).solid then
+            ^m.dist := min(a(1), min(a(2), a(3)))
+        else
+            ^m.dist := 100            
+        end if
+    end setDist
+    
     proc loadLevel(filename : string)
         for i : 1..upper(m)
             free m(i)
@@ -541,8 +561,9 @@ module game
             end if
         end for
             w -> defUpdate
-        var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ)
-        for i : 1..9
+        var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ, ^w.direct)
+        setDist(w, c)
+        for i : 1..3
             if checkColl_tile(w, c(i)) and objectclass(c(i)) >= door then
                 loadLevel(c(i) -> filename)
             end if
@@ -556,8 +577,9 @@ module game
                         var temp := checkColl(m(i), m(j))
                     end if
                 end for
-                    var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ)
-                for j : 1..9
+                    var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ, ^(m(i)).direct)
+                setDist(m(i), a)
+                for j : 1..3
                     var temp := checkColl_tile(m(i), a(j))
                 end for
             end if
@@ -618,6 +640,7 @@ loop
         score := 0
     end if
     game.draw
+    put ^w.dist
     View.Update
     cls
     Time.DelaySinceLast (16)
