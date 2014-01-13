@@ -1,18 +1,18 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TO DO LIST (in no particular order) %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Spawning at correct door            %
-% Locking doors + keys                %
-% Superdoors + Superkeys              %
-% Colision                            %
-% Goblin AI + arrows                  %
-% Goblin Mother                       %
-% Main Menu                           %
-% High Scores                         %
-% Win Conditions                      %
-% Potions                             %
-% Music / sound effects (?)           %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TO DO LIST (in no particular order)  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Spawning at correct door             %
+% Locking doors + keys                 %
+% Superdoors + Superkeys               %
+% Colision                             %
+% Goblin AI + arrows                   %
+% Goblin Mother                        %
+% Main Menu                            %
+% High Scores                          %
+% Win Conditions                       %
+% Potions                              %
+% Music / sound effects (?)            %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sorcerer's Maze                      %
@@ -196,7 +196,7 @@ class * item
     end draw
 end item
 
-% Potion Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * potion
     inherit item
@@ -394,7 +394,7 @@ class * room
     end draw
 end room
 
-% Door Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Door Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * door
         inherit tile
