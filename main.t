@@ -421,7 +421,7 @@ module game
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var m : flexible array 1..0 of ^moveable
     var level : ^room
-    var lastlevet : int := 0
+    var lastLevel, currentLevel := ""
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
         var c := abs(^m1.pos.x - ^m2.pos.x) <= SPRTSZ and abs(^m1.pos.y - ^m2.pos.y) <= SPRTSZ
@@ -467,8 +467,23 @@ module game
             free m(i)
         end for
             new m, 0
-        % Change this to spawn near doors
-        w -> setXY(newP(maxx div 2, maxy div 2))
+        currentLevel := filename
+        if lastLevel = "" then
+            w -> setXY(newP(maxx div 2, maxy div 2))
+        else
+            if lastLevel(1) > currentLevel(1) then
+                w -> setXY(newP(50, 288))
+            elsif lastLevel(1) < currentLevel(1) then
+                w -> setXY(newP(910, 288))
+            else
+                if lastLevel(2) < currentLevel(2) then
+                    w -> setXY(newP(400, 50))
+                elsif lastLevel(2) > currentLevel(2) then
+                    w -> setXY(newP(400, 575))
+                end if
+            end if
+        end if
+        
         var f : int
         var d : flexible array 1..0 of ^door
             open : f, "Levels/"+filename+".txt", get
@@ -551,6 +566,7 @@ module game
         for i : 1..3
             if checkColl_tile(w, c(i)) then
                 if objectclass(c(i)) >= door then
+                    lastLevel := currentLevel
                     loadLevel(c(i) -> filename)
                 end if
             end if
