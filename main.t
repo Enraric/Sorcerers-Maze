@@ -299,7 +299,8 @@ class * wizard
     end update
     
     body proc draw
-        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
+        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
+        Draw.FillBox(pos.x-24, pos.y-24, pos.x+24, pos.y+24, red)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -462,27 +463,23 @@ module game
         end if
     end spawnFireball
     
+    proc draw
+        ^level.draw
+        for i : 1..upper(m)
+            if m(i) -> isAlive then
+                m(i) -> draw
+            end if
+        end for
+            w -> draw
+        Font.Draw (intstr(score), maxx-(length(intstr(score))*10), maxy-25, text, white)
+    end draw
+    
     proc loadLevel(filename : string)
         for i : 1..upper(m)
             free m(i)
         end for
             new m, 0
         currentLevel := filename
-        if lastLevel = "" then
-            w -> setXY(newP(maxx div 2, maxy div 2))
-        else
-            if lastLevel(1) > currentLevel(1) then
-                w -> setXY(newP(50, 288))
-            elsif lastLevel(1) < currentLevel(1) then
-                w -> setXY(newP(910, 288))
-            else
-                if lastLevel(2) < currentLevel(2) then
-                    w -> setXY(newP(400, 50))
-                elsif lastLevel(2) > currentLevel(2) then
-                    w -> setXY(newP(400, 575))
-                end if
-            end if
-        end if
         
         var f : int
         var d : flexible array 1..0 of ^door
@@ -509,7 +506,7 @@ module game
                     d(upper(d)) := t
                 label 'g':
                     new tile, t
-                    spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    %spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -522,11 +519,26 @@ module game
             d(i) -> filename := fname
         end for
             close : f
+        if lastLevel = "" then
+            w -> setXY(newP(maxx div 2, maxy div 2))
+        else
+            if lastLevel(1) < currentLevel(1) then
+                w -> setXY(newP(50, 288))
+            elsif lastLevel(1) > currentLevel(1) then
+                w -> setXY(newP(910, 288))
+            else
+                if lastLevel(2) > currentLevel(2) then
+                    w -> setXY(newP(400, 50))
+                elsif lastLevel(2) < currentLevel(2) then
+                    w -> setXY(newP(400, 575))
+                end if
+            end if
+            delay(50)
+        end if
     end loadLevel
     
     proc initialize(levelName : string)
         new w
-        
         new level
         loadLevel(levelName)
     end initialize
@@ -582,7 +594,9 @@ module game
                 end for
                     var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ, ^(m(i)).direct)
                 for j : 1..3
-                    var temp := checkColl_tile(m(i), a(j))
+                    if checkColl_tile(m(i), a(j)) then
+                        
+                    end if
                 end for
             end if
         end for
@@ -591,17 +605,6 @@ module game
             timer := Time.Elapsed
         end if
     end update
-    
-    proc draw
-        ^level.draw
-        for i : 1..upper(m)
-            if m(i) -> isAlive then
-                m(i) -> draw
-            end if
-        end for
-            w -> draw
-        Font.Draw (intstr(score), maxx-(length(intstr(score))*10), maxy-25, text, white)
-    end draw
 end game
 
 % Pause Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
