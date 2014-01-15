@@ -19,11 +19,9 @@ proc controls
     Font.Draw ("Intructions", 230, 530, big, white)
     Font.Draw ("Use WASD to move", 10, 450, normal, white)
     Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, white)
-    Font.Draw ("Use space to regen health (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Use space to heal (requires mana)", 10, 350, normal, white)
     Font.Draw ("Find the four magic keys to escape", 10, 300, normal, white)
     Font.Draw ("Some doors require regular keys", 10, 250, normal, white)
-    Font.Draw ("Goblins will shoot at you", 10, 200, normal, white)
-    Font.Draw ("You can shoot back", 10, 150, normal, white)
     Font.Draw ("Return", 690, 10, small, white)
     View.Update
     loop

@@ -528,9 +528,9 @@ module game
                 w -> setXY(newP(910, 288))
             else
                 if lastLevel(2) > currentLevel(2) then
-                    w -> setXY(newP(400, 50))
+                    w -> setXY(newP(448, 50))
                 elsif lastLevel(2) < currentLevel(2) then
-                    w -> setXY(newP(400, 575))
+                    w -> setXY(newP(448, 575))
                 end if
             end if
             delay(50)
