@@ -15,9 +15,25 @@ end game
 
 proc controls
     cls
-    Font.Draw ("These are the controls", 10, 500, big, black)
+    drawfillbox(0, 0, 1000, 1000, black)
+    Font.Draw ("Intructions", 230, 530, big, white)
+    Font.Draw ("Use WASD to move", 10, 450, normal, white)
+    Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, white)
+    Font.Draw ("Use space to regen health (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Find the four magic keys to escape", 10, 300, normal, white)
+    Font.Draw ("Some doors require regular keys", 10, 250, normal, white)
+    Font.Draw ("Goblins will shoot at you", 10, 200, normal, white)
+    Font.Draw ("You can shoot back", 10, 150, normal, white)
+    Font.Draw ("Return", 690, 10, small, white)
     View.Update
-    delay(1000)
+    loop
+        buttonwait ("down", x, y, button, click)
+        if x > 685 and y > 5 and x < 800 and y < 50 then
+            exitloop := true
+        end if
+        exit when exitloop
+    end loop
+    exitloop := false
 end controls
 
 proc scorescreen
@@ -32,7 +48,7 @@ loop
     drawfillbox (0, 0, 1000, 1000, black)
     Font.Draw ("Sorcerer's Maze", 118, 500, big, white)
     Font.Draw ("PLAY", 345, 300, normal, white)
-    Font.Draw ("CONTROLS", 280, 250, normal, white)
+    Font.Draw ("INSTRUCTIONS", 245, 250, normal, white)
     Font.Draw ("HIGH SCORES", 260, 200, normal, white)
     Font.Draw ("QUIT", 345, 150, normal, white)
     View.Update
@@ -41,7 +57,7 @@ loop
     if x > 340 and y > 295 and x < 500 and y < 340 then
         game
         scorescreen
-    elsif x > 275 and y > 245 and x < 500 and y < 265 then
+    elsif x > 240 and y > 245 and x < 500 and y < 265 then
         controls
     elsif x > 255 and y > 195 and x < 500 and y < 240 then
         scorescreen
