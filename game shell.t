@@ -72,38 +72,26 @@ proc scorescreen
        
     for i : 1 .. 10
         Font.Draw (score (11-i).name, 10, 45 * i + 125, normal, white)
-        Font.Draw (intstr (score (11-i).scor), 845, 45 * i + 125, normal, white)
+        Font.Draw (intstr (score (11-i).scor), 750, 45 * i + 125, normal, white)
     end for
-     
-    drawbox (5, 5, 112, 25, white)
-    Font.Draw ("Admin mode", 10, 10, smaller, white)
     
-    drawbox (405, 5, 573, 45, white)
-    Font.Draw ("Play Again" , 410, 13, small, white)
-    
-    drawbox (880, 5, 955, 45, white)
-    Font.Draw ("Quit" , 885, 13, small, white)
+    Font.Draw ("Main Menu" , 405, 13, small, white)
     
     View.Update
     
-    /*
+    
     loop
         mousewhere (x, y, button)
-        if x > 5 and y > 5 and x < 112 and y < 25 and button = 1 then
-            admin
-        elsif x > 295 and x < 463 and y > 5 and y < 45 and button = 1 then
-            exitloop := true
-        elsif x > 720 and x < 795 and y > 5 and y < 45 and button = 1 then
+        if x > 400 and y > 5 and x < 583 and y < 45 and button = 1 then
             exitloop := true
         end if
         exit when exitloop
     end loop
-    */
+    
     
     exitloop := false
     playerscore.scor := 0
     playerscore.name := ""
-    delay(1000)
 end scorescreen
 
 loop    
