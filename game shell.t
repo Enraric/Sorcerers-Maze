@@ -15,9 +15,14 @@ end record
 var playerscore : scoredata
 var score : array 1 .. 10 of scoredata
 
+for i : 1 .. 10
+        score(i).name := "CPU"
+        score(i).scor := 2500
+end for
+
 proc game
     cls
-    Font.Draw ("This is the game", 118, 500, big, black)
+    Font.Draw ("This is the game", 180, 600, big, black)
     View.Update
     delay(1000)
 end game
@@ -62,24 +67,22 @@ proc scorescreen
     cls
     
     drawfillbox (0, 0, 1000, 1000, black)
-    Font.Draw ("Name", 10, 550, big, white)
-    Font.Draw ("Score", 630, 550, big, white)
-    
-    /*
+    Font.Draw ("Name", 10, 620, big, white)
+    Font.Draw ("Score", 750, 620, big, white)
+       
     for i : 1 .. 10
-        Font.Draw (score (11-i).name, 10, 45 * i + 35, normal, white)
-        Font.Draw (intstr (score (11-i).scor), 630, 45 * i + 35, normal, white)
+        Font.Draw (score (11-i).name, 10, 45 * i + 125, normal, white)
+        Font.Draw (intstr (score (11-i).scor), 845, 45 * i + 125, normal, white)
     end for
-    */ 
      
     drawbox (5, 5, 112, 25, white)
     Font.Draw ("Admin mode", 10, 10, smaller, white)
     
-    drawbox (295, 5, 463, 45, white)
-    Font.Draw ("Play Again" , 300, 13, small, white)
+    drawbox (405, 5, 573, 45, white)
+    Font.Draw ("Play Again" , 410, 13, small, white)
     
-    drawbox (720, 5, 795, 45, white)
-    Font.Draw ("Quit" , 725, 13, small, white)
+    drawbox (880, 5, 955, 45, white)
+    Font.Draw ("Quit" , 885, 13, small, white)
     
     View.Update
     
