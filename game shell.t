@@ -16,10 +16,10 @@ var playerscore : scoredata
 var score : array 1 .. 10 of scoredata
 
 for i : 1 .. 10
-        score(i).name := "CPU"
-        score(i).scor := 2500
+    score(i).name := "CPU"
+    score(i).scor := 2500
 end for
-
+    
 proc game
     cls
     Font.Draw ("This is the game", 180, 600, big, black)
@@ -58,9 +58,9 @@ proc scorescreen
     
     /*
     if playerscore.scor > score(10).scor then
-        letterEnter
-        score(10) := playerscore
-        scoresort
+    letterEnter
+    score(10) := playerscore
+    scoresort
     end if
     */
     
@@ -69,12 +69,12 @@ proc scorescreen
     drawfillbox (0, 0, 1000, 1000, black)
     Font.Draw ("Name", 10, 620, big, white)
     Font.Draw ("Score", 750, 620, big, white)
-       
+    
     for i : 1 .. 10
         Font.Draw (score (11-i).name, 10, 45 * i + 125, normal, white)
         Font.Draw (intstr (score (11-i).scor), 750, 45 * i + 125, normal, white)
     end for
-    
+        
     Font.Draw ("Main Menu" , 405, 13, small, white)
     
     View.Update
@@ -102,20 +102,32 @@ loop
     Font.Draw ("INSTRUCTIONS", 335, 250, normal, white)
     Font.Draw ("HIGH SCORES", 350, 200, normal, white)
     Font.Draw ("QUIT", 435, 150, normal, white)
-    View.Update
     
-    buttonwait ("down", x, y, button, click)
-    if x > 435 and y > 300 and x < 500 and y < 340 then
-        game
-        scorescreen
-    elsif x > 335 and y > 250 and x < 650 and y < 395 then
-        controls
-    elsif x > 350 and y > 200 and x < 650 and y < 245 then
-        scorescreen
-    elsif x > 435 and y > 150 and x < 650 and y < 195 then
-        exitloop := true
+    mousewhere (x, y, button)
+    if x > 430 and y > 295 and x < 550 and y < 340 then
+        drawbox (430, 295, 550, 340, white)
+        if button = 1 then
+            game
+            scorescreen
+        end if
+    elsif x > 330 and y > 245 and x < 645 and y < 290 then
+        drawbox (330, 245, 645, 290, white)
+        if button = 1 then
+            controls
+        end if
+    elsif x > 345 and y > 195 and x < 632 and y < 240 then
+        drawbox (345, 195, 632, 240, white)
+        if button = 1 then
+            scorescreen
+        end if
+    elsif x > 430 and y > 140 and x < 545 and y < 183 then
+        drawbox (430, 140, 545, 183, white)
+        if button = 1 then
+            exitloop := true
+        end if
     end if
-    
+        View.Update
+
     exit when exitloop
 end loop
 
