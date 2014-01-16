@@ -181,8 +181,12 @@ class * tile
         Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
     end draw
     
-    proc sDraw
-        Draw.FillBox(pos.x-(SPRTSZ div 4), pos.y-(SPRTSZ div 4), pos.x+(SPRTSZ div 4), pos.y+(SPRTSZ div 4), blue)
+    proc sDraw(i : int)
+    var c := blue
+    if i = 1 then
+        c := green
+    end if
+        Draw.FillBox(pos.x-(SPRTSZ div 4), pos.y-(SPRTSZ div 4), pos.x+(SPRTSZ div 4), pos.y+(SPRTSZ div 4), c)
     end sDraw
 end tile
 
@@ -304,15 +308,15 @@ class * wizard
     
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
-        Draw.FillBox(pos.x-24, pos.y-24, pos.x+24, pos.y+24, Rand.Int (0, 255))
-        Draw.FillBox (0, maxy-60, maxx, maxy, Rand.Int (0, 255))
-        Font.Draw ("Health", 210, maxy-25, text, Rand.Int (0, 255))
-        Font.Draw ("Mana", 210, maxy-50, text, Rand.Int (0, 255))
+        Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, purple)
+        Draw.FillBox (0, maxy-60, maxx, maxy, black)
+        Font.Draw ("Health", 210, maxy-25, text, white)
+        Font.Draw ("Mana", 210, maxy-50, text, white)
         for i : 0 .. 3
-            Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, Rand.Int (0, 250) + i)
+            Draw.FillBox (0, maxy-40, round (health * 2), maxy - i * 10, 47 + i)
         end for
             for i : 0 .. 3
-            Draw.FillBox (0, maxy-60, round (mana * 2), maxy - 41 - i * 5, Rand.Int (0, 250) + i)
+            Draw.FillBox (0, maxy-60, round (mana * 2), maxy - 41 - i * 5, 32 + i)
         end for
             for i : 1..upper(items)
             items(i) -> draw(i)
@@ -372,11 +376,11 @@ class * room
         var a : array 1..3 of ^tile
         if dir = 1 or dir = 3 then
             for i : 1..3
-                a(i) := map((x-2)+((i+1) mod 3),(y+2)-dir)
+                a(i) := map((x-1)+(i mod 3),(y+2)-dir)
             end for
             else
             for i : 1..3
-                a(i) := map((x+3)-dir,(y-2)+((i+1) mod 3))
+                a(i) := map((x+3)-dir,(y-1)+(i mod 3))
             end for
         end if
         result a
@@ -524,20 +528,20 @@ module game
         end for
             close : f
         if lastLevel = "" then
-            w -> setXY(newP(maxx div 2, maxy div 2))
+            w -> setXY(newP(9*48 + 24, 6*48 + 24))
         else
             if lastLevel(1) < currentLevel(1) then
-                w -> setXY(newP(67, 310))
+                w -> setXY(newP(72, 312))
             elsif lastLevel(1) > currentLevel(1) then
-                w -> setXY(newP(890, 310))
+                w -> setXY(newP(888, 312))
             else
                 if lastLevel(2) > currentLevel(2) then
-                    w -> setXY(newP(453, 70))
+                    w -> setXY(newP(456, 72))
                 elsif lastLevel(2) < currentLevel(2) then
-                    w -> setXY(newP(453, 555))
+                    w -> setXY(newP(456, 552))
                 end if
             end if
-            delay(50)
+            delay(100)
         end if
     end loadLevel
     
