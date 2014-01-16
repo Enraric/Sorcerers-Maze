@@ -180,6 +180,10 @@ class * tile
     body proc draw
         Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
     end draw
+    
+    proc sDraw
+        Draw.FillBox(pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), blue)
+    end sDraw
 end tile
 
 % The parent class for all types of items %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
