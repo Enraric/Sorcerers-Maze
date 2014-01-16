@@ -172,7 +172,7 @@ end moveable
 
 class * tile
     inherit object
-    export var filename
+    export var filename, sDraw
     solid := false
     pic := groundPic
     var filename : string    
@@ -182,7 +182,7 @@ class * tile
     end draw
     
     proc sDraw
-        Draw.FillBox(pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), blue)
+        Draw.FillBox(pos.x-(SPRTSZ div 4), pos.y-(SPRTSZ div 4), pos.x+(SPRTSZ div 4), pos.y+(SPRTSZ div 4), blue)
     end sDraw
 end tile
 
@@ -372,11 +372,11 @@ class * room
         var a : array 1..3 of ^tile
         if dir = 1 or dir = 3 then
             for i : 1..3
-                a(i) := map((x-2)+i,(y+2)-dir)
+                a(i) := map((x-2)+((i+1) mod 3),(y+2)-dir)
             end for
             else
             for i : 1..3
-                a(i) := map((x+3)-dir,(y-1)+i)
+                a(i) := map((x+3)-dir,(y-2)+((i+1) mod 3))
             end for
         end if
         result a
