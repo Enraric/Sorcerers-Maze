@@ -356,7 +356,8 @@ class * goblin
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+        drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), green)
     end draw
 end goblin
 
