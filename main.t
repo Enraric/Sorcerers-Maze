@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TO DO LIST (in no particular order)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FIX FIREBALLS / SOME DOORS DONT WORK %
 % Locking doors + keys                 %
 % Superdoors + Superkeys               %
 % Goblin AI + arrows                   %
