@@ -29,7 +29,7 @@ end game
 
 proc controls
     cls
-    drawfillbox(0, 0, 1000, 1000, black)
+    drawfillbox(0, 0, 1000, 1000, Rand.Int (0, 255))
     Font.Draw ("Intructions", 300, 600, big, Rand.Int (0, 255))
     Font.Draw ("Use WASD to move", 10, 450, normal, Rand.Int (0, 255))
     Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, Rand.Int (0, 255))
@@ -97,7 +97,7 @@ end scorescreen
 loop    
     setscreen ("graphics:960;684,offscreenonly,nobuttonbar")
     drawfillbox (0, 0, 1000, 1000, Rand.Int (0, 255))
-    Font.Draw ("Sorcerer's Maze", 200, 600, big, Rand.Int (0, 255))
+    Font.Draw ("Sorcerer's Maze", 210, 600, big, Rand.Int (0, 255))
     Font.Draw ("PLAY", 457, 300, normal, Rand.Int (0, 255))
     Font.Draw ("INSTRUCTIONS", 370, 250, normal, Rand.Int (0, 255))
     Font.Draw ("HIGH SCORES", 384, 200, normal, Rand.Int (0, 255))
