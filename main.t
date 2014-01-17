@@ -158,7 +158,7 @@ class * moveable
     end defUpdate
     
     proc defCollide(m : ^object)
-        move(direct, -(speed))
+        move(direct, -speed)
         collide(m)
     end defCollide
 end moveable
@@ -177,10 +177,10 @@ class * tile
     end draw
     
     proc sDraw(i : int)
-    var c := blue
-    if i = 1 then
-        c := green
-    end if
+        var c := blue
+        if i = 1 then
+            c := green
+        end if
         Draw.FillBox(pos.x-(SPRTSZ div 4), pos.y-(SPRTSZ div 4), pos.x+(SPRTSZ div 4), pos.y+(SPRTSZ div 4), c)
     end sDraw
 end tile
@@ -227,7 +227,7 @@ class * fireball
     end update
     
     body proc collide
-        if ^m.kind not= mode.neutral and ^m.solid and getDir(pos, ^m.pos) = direct then
+        if ^m.kind not= mode.neutral and ^m.solid then
             isAlive := false
         end if
     end collide
@@ -428,7 +428,7 @@ module game
     var lastLevel, currentLevel := ""
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
-        var c := abs(^m1.pos.x - ^m2.pos.x) <= SPRTSZ and abs(^m1.pos.y - ^m2.pos.y) <= SPRTSZ
+        var c := abs(^m1.pos.x - ^m2.pos.x) < SPRTSZ and abs(^m1.pos.y - ^m2.pos.y) < SPRTSZ
         if c then
             ^m1.defCollide(m2)
             ^m2.defCollide(m1)
@@ -437,7 +437,7 @@ module game
     end checkColl
     
     fcn checkColl_tile(m : ^moveable, s : ^tile) : boolean
-        var c := abs(^m.pos.x - ^s.pos.x) <= SPRTSZ and abs(^m.pos.y - ^s.pos.y) <= SPRTSZ and ^s.solid
+        var c := abs(^m.pos.x - ^s.pos.x) < SPRTSZ and abs(^m.pos.y - ^s.pos.y) < SPRTSZ and ^s.solid
         if c then
             ^m.defCollide(s)
         end if
@@ -579,6 +579,7 @@ module game
             w -> defUpdate
         var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ, ^w.direct)
         for i : 1..3
+            %c(i) -> sDraw(i)
             if checkColl_tile(w, c(i)) then
                 if objectclass(c(i)) >= door then
                     lastLevel := currentLevel
