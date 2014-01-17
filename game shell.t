@@ -15,17 +15,90 @@ end record
 var playerscore : scoredata
 var score : array 1 .. 10 of scoredata
 
+playerscore.scor := 0
+
 for i : 1 .. 10
     score(i).name := "CPU"
     score(i).scor := 0
 end for
     
+function clickCheck (x, y, x1, y1, x2, y2 : int) : boolean
+    result (x > x1) and (x < x2) and (y > y1) and (y < y2)
+end clickCheck
+
 proc game
     cls
     Font.Draw ("This is the game", 180, 600, big, black)
     View.Update
     delay(1000)
 end game
+
+proc letterEnter
+    
+    var s := 1
+    s := Window.Open ("graphics:450;400")
+    drawfillbox(0, 0, 1000, 1000, black)
+    
+    var letter : int := 65
+    var finish : boolean := false
+    var x, y, button : int := 0
+    var lettercount : int := 0
+    
+    playerscore.name := ""
+    
+    Font.Draw ("High Score! Enter your name.", 10, 350, small, white)
+    
+    % Left Arrow
+    drawbox (100, 200, 150, 250, white)
+    drawline (140, 210, 120, 210, white)
+    drawline (120, 210, 110, 225, white)
+    drawline (110, 225, 120, 240, white)
+    drawline (120, 240, 140, 240, white)
+    drawline (140, 240, 140, 210, white)
+    
+    % Right Arrow
+    drawbox (300, 200, 350, 250, white)
+    drawline (310, 210, 330, 210, white)
+    drawline (330, 210, 340, 225, white)
+    drawline (340, 225, 330, 240, white)
+    drawline (330, 240, 310, 240, white)
+    drawline (310, 240, 310, 210, white)
+    
+    % Enter Box
+    drawbox (200, 100, 250, 150, white)
+    drawline (210, 140, 210, 110, white)
+    drawline (210, 110, 230, 110, white)
+    drawline (230, 110, 240, 115, white)
+    drawline (240, 115, 230, 120, white)
+    drawline (230, 120, 220, 120, white)
+    drawline (220, 120, 220, 140, white)
+    drawline (220, 140, 210, 140, white)
+    
+    Font.Draw (chr (letter), 200, 180, big, white)
+    
+    loop
+        buttonwait ("down", x, y, button, button)
+        if clickCheck (x, y, 100, 200, 150, 250) and letter > 65 and button = 1 then
+            letter -= 1
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
+        end if
+        if clickCheck (x, y, 300, 200, 350, 250) and letter < 90 and button = 1 then
+            letter += 1
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
+        end if
+        if clickCheck (x, y, 200, 100, 250, 150) and button = 1 then
+            playerscore.name += chr (letter)
+            Font.Draw (playerscore.name, 150, 260, big, white)
+            lettercount += 1
+        end if
+        exit when lettercount = 3
+    end loop
+    
+    Window.Close (s)
+    
+end letterEnter
 
 proc controls
     cls
@@ -53,6 +126,29 @@ proc controls
     exitloop := false
 end controls
 
+proc scoresort
+    
+    var temp : int
+    
+    for i : 1 .. 10
+        for decreasing j : 10 .. 2
+            if score(j).scor > score(j - 1).scor then
+                var tempscore := score(j)
+                score(j) := score(j - 1)
+                score(j - 1) := tempscore
+            end if
+        end for
+    end for
+        
+    var f1 : int    
+    open : f1, "scores", write
+    for i : 1 .. 10
+        write : f1, score (i)
+    end for
+        close : f1
+    
+end scoresort
+
 proc scorescreen
     var f1 : int
     open : f1, "scores", read
@@ -61,13 +157,11 @@ proc scorescreen
     end for
         close: f1
     
-    /*
     if playerscore.scor > score(10).scor then
-    letterEnter
-    score(10) := playerscore
-    scoresort
+        letterEnter
+        score(10) := playerscore
+        scoresort
     end if
-    */
     
     cls
     
