@@ -22,20 +22,20 @@ end for
     
 proc game
     cls
-    Font.Draw ("This is the game", 180, 600, big, Rand.Int (0, 255))
+    Font.Draw ("This is the game", 180, 600, big, black)
     View.Update
     delay(1000)
 end game
 
 proc controls
     cls
-    drawfillbox(0, 0, 1000, 1000, Rand.Int (0, 255))
-    Font.Draw ("Intructions", 300, 600, big, Rand.Int (0, 255))
+    drawfillbox(0, 0, 1000, 1000, black)
+    Font.Draw ("Intructions", 300, 600, big, white)
     Font.Draw ("Use WASD to move", 10, 450, normal, Rand.Int (0, 255))
-    Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, Rand.Int (0, 255))
-    Font.Draw ("Use space to heal (requires mana)", 10, 350, normal, Rand.Int (0, 255))
-    Font.Draw ("Find the four magic keys to escape", 10, 300, normal, Rand.Int (0, 255))
-    Font.Draw ("Some doors require regular keys", 10, 250, normal, Rand.Int (0, 255))
+    Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, white)
+    Font.Draw ("Use space to heal (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Find the four magic keys to escape", 10, 300, normal, white)
+    Font.Draw ("Some doors require regular keys", 10, 250, normal, white)
     Font.Draw ("Return", 850, 10, small, white)
     View.Update
     loop
@@ -66,13 +66,13 @@ proc scorescreen
     
     cls
     
-    drawfillbox (0, 0, 1000, 1000, Rand.Int (0, 255))
-    Font.Draw ("Name", 10, 600, big, Rand.Int (0, 255))
-    Font.Draw ("Score", 750, 600, big, Rand.Int (0, 255))
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("Name", 10, 600, big, white)
+    Font.Draw ("Score", 750, 600, big, white)
     
     for i : 1 .. 10
-        Font.Draw (score (11-i).name, 10, 45 * i + 105, normal, Rand.Int (0, 255))
-        Font.Draw (intstr (score (11-i).scor), 750, 45 * i + 105, normal, Rand.Int (0, 255))
+        Font.Draw (score (11-i).name, 10, 45 * i + 105, normal, white)
+        Font.Draw (intstr (score (11-i).scor), 750, 45 * i + 105, normal, white)
     end for
         
     Font.Draw ("Main Menu" , 405, 13, small, Rand.Int (0, 255))
@@ -96,32 +96,32 @@ end scorescreen
 
 loop    
     setscreen ("graphics:960;684,offscreenonly,nobuttonbar")
-    drawfillbox (0, 0, 1000, 1000, Rand.Int (0, 255))
-    Font.Draw ("Sorcerer's Maze", 210, 600, big, Rand.Int (0, 255))
-    Font.Draw ("PLAY", 457, 300, normal, Rand.Int (0, 255))
-    Font.Draw ("INSTRUCTIONS", 370, 250, normal, Rand.Int (0, 255))
-    Font.Draw ("HIGH SCORES", 384, 200, normal, Rand.Int (0, 255))
-    Font.Draw ("QUIT", 455, 150, normal, Rand.Int (0, 255))
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
+    Font.Draw ("PLAY", 457, 300, normal, white)
+    Font.Draw ("INSTRUCTIONS", 370, 250, normal, white)
+    Font.Draw ("HIGH SCORES", 384, 200, normal, white)
+    Font.Draw ("QUIT", 455, 150, normal, white)
     
     mousewhere (x, y, button)
     if x > 452 and y > 295 and x < 540 and y < 340 then
-        drawbox (452, 295, 540, 340, Rand.Int (0, 255))
+        drawbox (452, 295, 540, 340, white)
         if button = 1 then
             game
             scorescreen
         end if
     elsif x > 365 and y > 245 and x < 620 and y < 290 then
-        drawbox (365, 245, 620, 290, Rand.Int (0, 255))
+        drawbox (365, 245, 620, 290, white)
         if button = 1 then
             controls
         end if
     elsif x > 379 and y > 195 and x < 612 and y < 240 then
-        drawbox (379, 195, 612, 240, Rand.Int (0, 255))
+        drawbox (379, 195, 612, 240, white)
         if button = 1 then
             scorescreen
         end if
     elsif x > 450 and y > 140 and x < 537 and y < 188 then
-        drawbox (450, 140, 537, 188, Rand.Int (0, 255))
+        drawbox (450, 140, 537, 188, white)
         if button = 1 then
             exitloop := true
         end if
