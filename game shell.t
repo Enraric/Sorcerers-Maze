@@ -32,10 +32,11 @@ proc controls
     Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Intructions", 300, 600, big, white)
     Font.Draw ("Use WASD to move", 10, 450, normal, white)
-    Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, white)
-    Font.Draw ("Use space to heal (requires mana)", 10, 350, normal, white)
-    Font.Draw ("Find the four magic keys to escape", 10, 300, normal, white)
-    Font.Draw ("Some doors require regular keys", 10, 250, normal, white)
+    Font.Draw ("Tap the arrow keys to throw fire (requires mana)", 10, 400, normal, white)
+    Font.Draw ("Hold the space bar to heal (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Tap P to pause and unpause", 10, 300, normal, white)
+    Font.Draw ("Find the four magic keys to escape", 10, 250, normal, white)
+    Font.Draw ("Some doors require regular keys", 10, 200, normal, white)
     Font.Draw ("Return", 850, 10, small, white)
     View.Update
     loop
