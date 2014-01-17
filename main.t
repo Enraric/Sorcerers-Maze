@@ -7,7 +7,6 @@
 % Goblin AI + arrows                   %
 % Goblin Mother                        %
 % Win Conditions                       %
-% Music                                %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -19,7 +18,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const * SPRTSZ := 48
-var * score : int := 0
+var * score : int := 3600
 var step : int := 0
 
 % Stuff for Collision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -346,7 +345,7 @@ class * goblin
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
         if isAlive = false then
-            score -= 10
+            score += 10
         end if
     end update
     
@@ -614,9 +613,9 @@ end game
 % Pause Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc pausescreen
-    var asdasf := Font.New ("Sans:48:Bold")
+    var asdasf := Font.New ("Impact:62:Bold")
     drawfillbox (0, 0, 1000, 1000, black)
-    Font.Draw ("PAUSED", 330, 330, asdasf, white)
+    Font.Draw ("PAUSED", 350, 310, asdasf, white)
     View.Update
     delay(100)
     loop
@@ -642,11 +641,11 @@ loop
         delay (50)
     end if
     if step = 4 then
-        score += 1
+        score -= 1
         step := 0
     end if
-    if score < 0 then
-        score := 0
+    if score = 0 then
+        lose := true
     end if
     game.draw
     View.Update
