@@ -3,7 +3,7 @@ var smaller := Font.New ("Impact:14")
 var normal := Font.New ("Impact:32")
 var big := Font.New ("Impact:62:Bold")
 var small := Font.New ("Impact:28")
-var x, y, button, click : int
+var x, y, button: int
 var exitloop : boolean := false
 
 type scoredata :
@@ -17,7 +17,7 @@ var score : array 1 .. 10 of scoredata
 
 for i : 1 .. 10
     score(i).name := "CPU"
-    score(i).scor := 2500
+    score(i).scor := 0
 end for
     
 proc game
@@ -29,9 +29,9 @@ end game
 
 proc controls
     cls
-    drawfillbox(0, 0, 1000, 1000, black)
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Intructions", 300, 600, big, white)
-    Font.Draw ("Use WASD to move", 10, 450, normal, Rand.Int (0, 255))
+    Font.Draw ("Use WASD to move", 10, 450, normal, white)
     Font.Draw ("Use the arrow keys to shoot (requires mana)", 10, 400, normal, white)
     Font.Draw ("Use space to heal (requires mana)", 10, 350, normal, white)
     Font.Draw ("Find the four magic keys to escape", 10, 300, normal, white)
@@ -39,11 +39,15 @@ proc controls
     Font.Draw ("Return", 850, 10, small, white)
     View.Update
     loop
-        buttonwait ("down", x, y, button, click)
+        mousewhere (x, y, button)
         if x > 850 and y > 5 and x < 1000 and y < 50 then
-            exitloop := true
+            drawbox (845, 5, 955, 45, white)
+            if button = 1 then
+                exitloop := true
+            end if
         end if
         exit when exitloop
+        View.Update
     end loop
     exitloop := false
 end controls
@@ -66,7 +70,7 @@ proc scorescreen
     
     cls
     
-    drawfillbox (0, 0, 1000, 1000, black)
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Name", 10, 600, big, white)
     Font.Draw ("Score", 750, 600, big, white)
     
@@ -75,17 +79,21 @@ proc scorescreen
         Font.Draw (intstr (score (11-i).scor), 750, 45 * i + 105, normal, white)
     end for
         
-    Font.Draw ("Main Menu" , 405, 13, small, Rand.Int (0, 255))
+    Font.Draw ("Main Menu" , 405, 13, small, white)
     
     View.Update
     
     
     loop
         mousewhere (x, y, button)
-        if x > 400 and y > 5 and x < 583 and y < 45 and button = 1 then
-            exitloop := true
+        if x > 400 and y > 5 and x < 575 and y < 50 then
+            drawbox (400, 5, 575, 50, white)
+            if button = 1 then
+                exitloop := true
+            end if
         end if
         exit when exitloop
+        View.Update
     end loop
     
     
@@ -96,7 +104,7 @@ end scorescreen
 
 loop    
     setscreen ("graphics:960;684,offscreenonly,nobuttonbar")
-    drawfillbox (0, 0, 1000, 1000, black)
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
     Font.Draw ("PLAY", 457, 300, normal, white)
     Font.Draw ("INSTRUCTIONS", 370, 250, normal, white)
@@ -126,8 +134,8 @@ loop
             exitloop := true
         end if
     end if
-        View.Update
-
+    View.Update
+    
     exit when exitloop
 end loop
 
