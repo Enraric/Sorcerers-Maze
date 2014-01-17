@@ -537,8 +537,7 @@ module game
                     w -> setXY(newP(456, 552))
                 end if
             end if
-            delay(100)
-        end if
+        end if 
     end loadLevel
     
     proc initialize(levelName : string)
