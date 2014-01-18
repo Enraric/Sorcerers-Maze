@@ -22,6 +22,10 @@ for i : 1 .. 10
     score(i).scor := 0
 end for
     
+process music
+    Music.PlayFileLoop ("ScienceBlaster.MP3")
+end music
+
 function clickCheck (x, y, x1, y1, x2, y2 : int) : boolean
     result (x > x1) and (x < x2) and (y > y1) and (y < y2)
 end clickCheck
@@ -197,8 +201,11 @@ proc scorescreen
     playerscore.name := ""
 end scorescreen
 
+setscreen ("graphics:960;684,offscreenonly,nobuttonbar")
+
+fork music
+
 loop    
-    setscreen ("graphics:960;684,offscreenonly,nobuttonbar")
     Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
     Font.Draw ("PLAY", 457, 300, normal, white)
