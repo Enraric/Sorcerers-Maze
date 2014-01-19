@@ -1,4 +1,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TO DO LIST (in no particular order)  %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FIX FIREBALLS                        %
+% Locking doors + keys                 %
+% Superdoors + Superkeys               %
+% Goblin AI + arrows                   %
+% Goblin Mother                        %
+% Win Conditions                       %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sorcerer's Maze                      %
 % Programmed by Alexander McMorine III %
 % and Ian Frosst                       %
@@ -15,7 +26,6 @@ var * normal := Font.New ("Impact:32")
 var * big := Font.New ("Impact:62:Bold")
 var * small := Font.New ("Impact:28")
 var * xThing, yThing, button: int
-var * exitloop : boolean := false
 
 type scoredata :
 record
@@ -32,9 +42,7 @@ for i : 1 .. 10
     scores(i).name := "CPU"
     scores(i).scor := 0
 end for
-
-
-
+    
 % Stuff for Collision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 type * point:
@@ -645,31 +653,32 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-game.initialize("C3") 
-
-loop
-    Input.KeyDown (keys)
-    game.update
-    if keys ('p') then
-        pausescreen
-        delay (50)
-    end if
-    if step = 4 then
-        score -= 1
-        step := 0
-    end if
-    if score = 0 then
-        lose := true
-    end if
-    game.draw
-    View.Update
-    cls
-    Time.DelaySinceLast (16)
-    step += 1
-    exit when lose
-end loop
-playerscore.scor := score
-game.gameover
+    Music.PlayFileLoop("ScienceBlaster.mp3")
+    game.initialize("C3") 
+    
+    loop
+        Input.KeyDown (keys)
+        game.update
+        if keys ('p') then
+            pausescreen
+            delay (50)
+        end if
+        if step = 10 then
+            score -= 1
+            step := 0
+        end if
+        if score = 0 then
+            lose := true
+        end if
+        game.draw
+        View.Update
+        cls
+        Time.DelaySinceLast (16)
+        step += 1
+        exit when lose
+    end loop
+    playerscore.scor := score
+    game.gameover
 end gamerun
 
 % Function for clicking buttons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -743,7 +752,6 @@ proc letterEnter
     end loop
     
     Window.Close (s)
-    
 end letterEnter
 
 % Intructions Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -765,19 +773,16 @@ proc controls
         if xThing > 850 and yThing > 5 and xThing < 1000 and yThing < 50 then
             drawbox (845, 5, 955, 45, white)
             if button = 1 then
-                exitloop := true
+                exit
             end if
         end if
-        exit when exitloop
         View.Update
     end loop
-    exitloop := false
 end controls
 
 % High Score Sorting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc scoresort
-    
     var temp : int
     
     for i : 1 .. 10
@@ -796,7 +801,6 @@ proc scoresort
         write : f1, scores (i)
     end for
         close : f1
-    
 end scoresort
 
 % The High Score Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -816,7 +820,6 @@ proc scorescreen
     end if
     
     cls
-    
     Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
     Font.Draw ("Name", 10, 600, big, white)
     Font.Draw ("Score", 750, 600, big, white)
@@ -827,24 +830,19 @@ proc scorescreen
     end for
         
     Font.Draw ("Main Menu" , 405, 13, small, white)
-    
     View.Update
-    
     
     loop
         mousewhere (xThing, yThing, button)
         if xThing > 400 and yThing > 5 and xThing < 575 and yThing < 50 then
             drawbox (400, 5, 575, 50, white)
             if button = 1 then
-                exitloop := true
+                exit
             end if
         end if
-        exit when exitloop
         View.Update
     end loop
     
-    
-    exitloop := false
     playerscore.scor := 0
     playerscore.name := ""
 end scorescreen
@@ -879,14 +877,12 @@ loop
             scorescreen
         end if
     elsif xThing > 450 and yThing > 140 and xThing < 537 and yThing < 188 then
-        drawbox (450, 140, 537, 188, white)
+        drawbox (450, 143, 540, 188, white)
         if button = 1 then
-            exitloop := true
+            exit
         end if
     end if
     View.Update
-    
-    exit when exitloop
 end loop
 
 Window.Hide (-1)
