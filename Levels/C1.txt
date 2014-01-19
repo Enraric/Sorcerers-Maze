@@ -3,9 +3,9 @@ w                  w
 w www  wwwwww  www w
 w w              w w
 w                  w
-w w     ggg      w w
-w w     ggg      w w
-w w     ggg      w w
+w w              w w
+w w      m       w w
+w w              w w
 w                  w
 w w              w w
 w www          www w

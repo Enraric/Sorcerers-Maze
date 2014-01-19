@@ -663,7 +663,7 @@ proc gamerun
             pausescreen
             delay (50)
         end if
-        if step = 10 then
+        if step = 5 then
             score -= 1
             step := 0
         end if
