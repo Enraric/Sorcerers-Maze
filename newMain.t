@@ -1,7 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TO DO LIST (in no particular order)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FIX FIREBALLS                        %
 % Locking doors + keys                 %
 % Superdoors + Superkeys               %
 % Goblin AI + arrows                   %
@@ -482,11 +481,11 @@ module game
     
     proc spawnFireball(i : int)
         if ^w.useMana(10) then
-            new m, upper(m)+1 % Why are we creating a new movable AND a new fireball?
+            new m, upper(m)+1
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
             m(upper(m)) -> setXY(^w.pos)
-            % This could be where the issue can be solved by making fireballs spawn 49 pixels away so you don't collide with it as it spawns.
+            m(upper(m)) -> move(i, 49)
         end if
     end spawnFireball
     
@@ -533,7 +532,7 @@ module game
                     d(upper(d)) := t
                 label 'g':
                     new tile, t
-                    %spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -654,7 +653,7 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-    Music.PlayFileLoop("ScienceBlaster.mp3")
+    %Music.PlayFileLoop("ScienceBlaster.mp3")
     game.initialize("C3") 
     
     loop
