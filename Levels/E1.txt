@@ -1,14 +1,14 @@
 wwwwwwwwwwwwwwwwwwww
-w           g      w
-w     g            w
-w  wwwwwwwwwwwwww  w
-w  wwwwwww    wwwg w
-w        wgw  www  w
-w     g  wgw  www  w
-w        wgw  www  w
-w        w w g ww gw
-w        w w   ww  w
-w g    g w w       w
-w       zw  w      w
-wwwwwwwwwwlwwwwwwwww
+w          g      ww
+w    g            ww
+w  wwwwwwwwwwwww  ww
+w  wwwwww    wwwg ww
+w       wgw  www  ww
+w     g wgw  www  ww
+w       wgw  www  ww
+w       w w g ww gww
+w       w w   ww  ww
+w g   g w w       ww
+w      zw  w      ww
+wwwwwwwwwlwwwwwwwwww
 E2
