@@ -482,10 +482,11 @@ module game
     
     proc spawnFireball(i : int)
         if ^w.useMana(10) then
-            new m, upper(m)+1
+            new m, upper(m)+1 % Why are we creating a new movable AND a new fireball?
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
             m(upper(m)) -> setXY(^w.pos)
+            % This could be where the issue can be solved by making fireballs spawn 49 pixels away so you don't collide with it as it spawns.
         end if
     end spawnFireball
     
@@ -578,10 +579,10 @@ module game
                 free m(i)
             end if
         end for
-            for i : 1..upper(a)
+        for i : 1..upper(a)
             m(i) := a(i)
         end for
-            new m, upper(a)
+        new m, upper(a)
     end sweep
     
     proc update
