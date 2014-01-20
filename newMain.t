@@ -236,7 +236,7 @@ end potion
 class * fireball
     inherit moveable    
     speed := 8
-    damage := 50.0
+    damage := 10.0
     kind := mode.friend
     solid := false
     
@@ -291,7 +291,7 @@ class * wizard
     end useMana
     
     body proc collide
-        if ^m.kind = mode.enemy then
+        if ^m.kind = mode.enemy or ^m.kind = mode.friend then
             health -= ^m.damage
         end if
     end collide
@@ -360,8 +360,10 @@ class * goblin
     damage := 0.5
     var randmove := Rand.Int (0, 4)
     var t := w
+    var mana := 10
     
     body proc update
+        mana += 1
         if step = Rand.Int (24, 72) then
             direct := Rand.Int(1, 4)
             step := 0
