@@ -486,6 +486,7 @@ module game
             m(upper(m)) -> direct := i
             m(upper(m)) -> setXY(^w.pos)
             m(upper(m)) -> move(i, 49)
+            var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
         end if
     end spawnFireball
     
