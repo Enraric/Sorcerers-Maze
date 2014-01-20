@@ -3,7 +3,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Locking doors + keys                 %
 % Superdoors + Superkeys               %
-% Goblin AI + arrows                   %
 % Goblin Mother                        %
 % Win Conditions                       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -362,25 +361,8 @@ class * goblin
     var t := w
     var mana : real := 10
     
-    fcn useMana(use : real) : boolean
-        var u := mana - use > 0
-        if u then
-            mana -= use
-        end if
-        result u
-    end useMana
-    
     body proc update
-        mana += 1
-        if step = Rand.Int (24, 72) then
-            direct := Rand.Int(1, 4)
-            step := 0
-        end if
-        if step = 73 then
-            direct := Rand.Int(1, 4)
-            step := 0
-        end if
-        %direct := getDir(pos, ^t.pos)
+        direct := getDir(pos, ^t.pos)
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
         if isAlive = false then
@@ -507,19 +489,6 @@ module game
             var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
         end if
     end spawnFireball
-    
-    /*
-    proc spawnFireGob(i : int)
-        if ^g.useMana(10) then
-            new m, upper(m)+1
-            new fireball, m(upper(m))
-            m(upper(m)) -> direct := i
-            m(upper(m)) -> setXY(^w.pos)
-            m(upper(m)) -> move(i, 49)
-            var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
-        end if
-    end spawnFireGob
-    */
     
     proc draw
         ^level.draw
