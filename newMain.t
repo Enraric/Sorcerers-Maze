@@ -360,7 +360,15 @@ class * goblin
     damage := 0.5
     var randmove := Rand.Int (0, 4)
     var t := w
-    var mana := 10
+    var mana : real := 10
+    
+    fcn useMana(use : real) : boolean
+        var u := mana - use > 0
+        if u then
+            mana -= use
+        end if
+        result u
+    end useMana
     
     body proc update
         mana += 1
@@ -499,6 +507,19 @@ module game
             var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
         end if
     end spawnFireball
+    
+    /*
+    proc spawnFireGob(i : int)
+        if ^g.useMana(10) then
+            new m, upper(m)+1
+            new fireball, m(upper(m))
+            m(upper(m)) -> direct := i
+            m(upper(m)) -> setXY(^w.pos)
+            m(upper(m)) -> move(i, 49)
+            var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
+        end if
+    end spawnFireGob
+    */
     
     proc draw
         ^level.draw
