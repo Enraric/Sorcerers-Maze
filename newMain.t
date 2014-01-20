@@ -362,7 +362,15 @@ class * goblin
     var t := w
     
     body proc update
-        direct := getDir(pos, ^t.pos)
+        if step = Rand.Int (24, 72) then
+            direct := Rand.Int(1, 4)
+            step := 0
+        end if
+        if step = 73 then
+            direct := Rand.Int(1, 4)
+            step := 0
+        end if
+        %direct := getDir(pos, ^t.pos)
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
         if isAlive = false then
