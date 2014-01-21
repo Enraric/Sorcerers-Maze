@@ -186,7 +186,7 @@ class * moveable
     end defCollide
 end moveable
 
-% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The parent class for all things on-screen that DON'T move %%%%%% Like keys? Hmmm... %%%%%%%%%%%%%%
 
 class * tile
     inherit object
@@ -225,13 +225,14 @@ end item
 
 % Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * potion
-    inherit item
+class * keyType
+    export super
+
+    var super : boolean
     
-    body proc use
-        
-    end use
-end potion
+    deferred proc draw
+
+end keyType
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -369,7 +370,7 @@ class * goblin
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
         if isAlive = false then
-            score += 10
+            score += 15
         end if
     end update
     
