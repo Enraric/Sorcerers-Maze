@@ -114,7 +114,7 @@ var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
 var * superkey := Pic.FileNew ("Graphics/superkey.bmp")
-var * key := Pic.FileNew ("Graphics/key.bmp"
+var * key := Pic.FileNew ("Graphics/key.bmp")
 var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
 var * wizMove := loadPics2 ("mage")
 var * gobMove := loadPics2 ("troll")
@@ -706,15 +706,13 @@ proc gamerun
             score -= 1
             step := 0
         end if
-        if score = 0 then
-            lose := true
-        end if
+        lose := score = 0
         game.draw
         View.Update
         cls
         Time.DelaySinceLast (16)
         step += 1
-        exit when lose
+        exit when lose or wonTheGame
     end loop
     playerscore.scor := score
     game.gameover
