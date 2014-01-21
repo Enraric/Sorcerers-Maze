@@ -328,7 +328,7 @@ class * wizard
     
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
-        Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, Rand.Int (0, 225))
+        Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, purple)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -382,7 +382,7 @@ class * goblin
     
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
-        drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), Rand.Int(0,255))
+        drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), green)
     end draw
 end goblin
 
@@ -394,7 +394,7 @@ class * boss
     health := 50.0
     speed := 1
     var canHit := false
-    var col := Rand.Int(0,255)
+    var col := blue
     
     body proc update
         if ~canHit and step = 75 then
@@ -405,9 +405,9 @@ class * boss
             step := 0
         end if
         if canHit then
-            col := Rand.Int (0, 255)
+            col := brightblue
         else
-            col := Rand.Int (0, 255)
+            col := blue
         end if
         isAlive := not health <= 0
         wonTheGame := not isAlive
@@ -507,8 +507,8 @@ module game
     
     proc gameover
         cls
-        drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
-        Font.Draw ("Game Over", 300, 350, title, Rand.Int (0, 255))
+        drawfillbox (0, 0, maxx, maxy, black)
+        Font.Draw ("Game Over", 300, 350, title, white)
         View.Update
     end gameover
     
@@ -677,8 +677,8 @@ end game
 
 proc pausescreen
     var asdasf := Font.New ("Impact:62:Bold")
-    drawfillbox (0, 0, 1000, 1000, Rand.Int (0, 255))
-    Font.Draw ("PAUSED", 350, 310, asdasf, Rand.Int (0, 255))
+    drawfillbox (0, 0, 1000, 1000, black)
+    Font.Draw ("PAUSED", 350, 310, asdasf, white)
     View.Update
     delay(100)
     loop
@@ -733,7 +733,7 @@ proc letterEnter
     
     var s := 1
     s := Window.Open ("graphics:450;400")
-    drawfillbox(0, 0, 1000, 1000, Rand.Int (0, 255))
+    drawfillbox(0, 0, 1000, 1000, black)
     
     var letter : int := 65
     var finish : boolean := false
@@ -744,48 +744,48 @@ proc letterEnter
     Font.Draw ("High Score! Enter your name.", 10, 350, small, white)
     
     % Left Arrow
-    drawbox (100, 200, 150, 250, Rand.Int (0, 255))
-    drawline (140, 210, 120, 210, Rand.Int (0, 255))
-    drawline (120, 210, 110, 225, Rand.Int (0, 255))
-    drawline (110, 225, 120, 240, Rand.Int (0, 255))
-    drawline (120, 240, 140, 240, Rand.Int (0, 255))
-    drawline (140, 240, 140, 210, Rand.Int (0, 255))
+    drawbox (100, 200, 150, 250, white)
+    drawline (140, 210, 120, 210, white)
+    drawline (120, 210, 110, 225, white)
+    drawline (110, 225, 120, 240, white)
+    drawline (120, 240, 140, 240, white)
+    drawline (140, 240, 140, 210, white)
     
     % Right Arrow
-    drawbox (300, 200, 350, 250, Rand.Int (0, 255))
-    drawline (310, 210, 330, 210, Rand.Int (0, 255))
-    drawline (330, 210, 340, 225, Rand.Int (0, 255))
-    drawline (340, 225, 330, 240, Rand.Int (0, 255))
-    drawline (330, 240, 310, 240, Rand.Int (0, 255))
-    drawline (310, 240, 310, 210, Rand.Int (0, 255))
+    drawbox (300, 200, 350, 250, white)
+    drawline (310, 210, 330, 210, white)
+    drawline (330, 210, 340, 225, white)
+    drawline (340, 225, 330, 240, white)
+    drawline (330, 240, 310, 240, white)
+    drawline (310, 240, 310, 210, white)
     
     % Enter Box
-    drawbox (200, 100, 250, 150, Rand.Int (0, 255))
-    drawline (210, 140, 210, 110, Rand.Int (0, 255))
-    drawline (210, 110, 230, 110, Rand.Int (0, 255))
-    drawline (230, 110, 240, 115, Rand.Int (0, 255))
-    drawline (240, 115, 230, 120, Rand.Int (0, 255))
-    drawline (230, 120, 220, 120, Rand.Int (0, 255))
-    drawline (220, 120, 220, 140, Rand.Int (0, 255))
-    drawline (220, 140, 210, 140, Rand.Int (0, 255))
+    drawbox (200, 100, 250, 150, white)
+    drawline (210, 140, 210, 110, white)
+    drawline (210, 110, 230, 110, white)
+    drawline (230, 110, 240, 115, white)
+    drawline (240, 115, 230, 120, white)
+    drawline (230, 120, 220, 120, white)
+    drawline (220, 120, 220, 140, white)
+    drawline (220, 140, 210, 140, white)
     
-    Font.Draw (chr (letter), 200, 180, big, Rand.Int (0, 255))
+    Font.Draw (chr (letter), 200, 180, big, white)
     
     loop
         buttonwait ("down", xxx, yyy, button, button)
         if clickCheck (xxx, yyy, 100, 200, 150, 250) and letter > 65 and button = 1 then
             letter -= 1
-            drawfillbox (180, 150, 270, 250, Rand.Int (0, 255))
-            Font.Draw (chr (letter), 200, 180, big, Rand.Int (0, 255))
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
         end if
         if clickCheck (xxx, yyy, 300, 200, 350, 250) and letter < 90 and button = 1 then
             letter += 1
-            drawfillbox (180, 150, 270, 250, Rand.Int (0, 255))
-            Font.Draw (chr (letter), 200, 180, big, Rand.Int (0, 255))
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
         end if
         if clickCheck (xxx, yyy, 200, 100, 250, 150) and button = 1 then
             playerscore.name += chr (letter)
-            Font.Draw (playerscore.name, 150, 260, big, Rand.Int (0, 255))
+            Font.Draw (playerscore.name, 150, 260, big, white)
             lettercount += 1
         end if
         exit when lettercount = 3
@@ -798,21 +798,20 @@ end letterEnter
 
 proc controls
     cls
-    %Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
-    drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
-    Font.Draw ("Intructions", 300, 600, big, Rand.Int (0, 255))
-    Font.Draw ("Use WASD to move", 10, 450, normal, Rand.Int (0, 255))
-    Font.Draw ("Tap the arrow keys to throw fire (requires mana)", 10, 400, normal, Rand.Int (0, 255))
-    Font.Draw ("Hold the space bar to heal (requires mana)", 10, 350, normal, Rand.Int (0, 255))
-    Font.Draw ("Tap P to pause and unpause", 10, 300, normal, Rand.Int (0, 255))
-    Font.Draw ("Find the four magic keys to escape", 10, 250, normal, Rand.Int (0, 255))
-    Font.Draw ("Some doors require regular keys", 10, 200, normal, Rand.Int (0, 255))
-    Font.Draw ("Return", 850, 10, small, Rand.Int (0, 255))
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Intructions", 300, 600, big, white)
+    Font.Draw ("Use WASD to move", 10, 450, normal, white)
+    Font.Draw ("Tap the arrow keys to throw fire (requires mana)", 10, 400, normal, white)
+    Font.Draw ("Hold the space bar to heal (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Tap P to pause and unpause", 10, 300, normal, white)
+    Font.Draw ("Find the four magic keys to escape", 10, 250, normal, white)
+    Font.Draw ("Some doors require regular keys", 10, 200, normal, white)
+    Font.Draw ("Return", 850, 10, small, white)
     View.Update
     loop
         mousewhere (xxx, yyy, button)
         if xxx > 850 and yyy > 5 and xxx < 1000 and yyy < 50 then
-            drawbox (845, 5, 955, 45, Rand.Int (0, 255))
+            drawbox (845, 5, 955, 45, white)
             if button = 1 then
                 exit
             end if
@@ -861,23 +860,22 @@ proc scorescreen
     end if
     
     cls
-    %Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
-    drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
-    Font.Draw ("Name", 10, 600, big, Rand.Int (0, 255))
-    Font.Draw ("Score", 750, 600, big, Rand.Int (0, 255))
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Name", 10, 600, big, white)
+    Font.Draw ("Score", 750, 600, big, white)
     
     for i : 1 .. 10
-        Font.Draw (scores (11-i).name, 10, 45 * i + 105, normal, Rand.Int (0, 255))
-        Font.Draw (intstr (scores (11-i).scor), 750, 45 * i + 105, normal, Rand.Int (0, 255))
+        Font.Draw (scores (11-i).name, 10, 45 * i + 105, normal, white)
+        Font.Draw (intstr (scores (11-i).scor), 750, 45 * i + 105, normal, white)
     end for
         
-    Font.Draw ("Main Menu" , 405, 13, small, Rand.Int (0, 255))
+    Font.Draw ("Main Menu" , 405, 13, small, white)
     View.Update
     
     loop
         mousewhere (xxx, yyy, button)
         if xxx > 400 and yyy > 5 and xxx < 575 and yyy < 50 then
-            drawbox (400, 5, 575, 50, Rand.Int (0, 255))
+            drawbox (400, 5, 575, 50, white)
             if button = 1 then
                 exit
             end if
@@ -894,33 +892,32 @@ end scorescreen
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
 
 loop    
-    %Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
-    drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
-    Font.Draw ("Sorcerer's Maze", 210, 600, big, Rand.Int (0, 255))
-    Font.Draw ("PLAY", 457, 300, normal, Rand.Int (0, 255))
-    Font.Draw ("INSTRUCTIONS", 370, 250, normal, Rand.Int (0, 255))
-    Font.Draw ("HIGH SCORES", 384, 200, normal, Rand.Int (0, 255))
-    Font.Draw ("QUIT", 455, 150, normal, Rand.Int (0, 255))
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
+    Font.Draw ("PLAY", 457, 300, normal, white)
+    Font.Draw ("INSTRUCTIONS", 370, 250, normal, white)
+    Font.Draw ("HIGH SCORES", 384, 200, normal, white)
+    Font.Draw ("QUIT", 455, 150, normal, white)
     
     mousewhere (xxx, yyy, button)
     if xxx > 452 and yyy > 295 and xxx < 540 and yyy < 340 then
-        drawbox (452, 295, 540, 340, Rand.Int (0, 255))
+        drawbox (452, 295, 540, 340, white)
         if button = 1 then
             gamerun
             scorescreen
         end if
     elsif xxx > 365 and yyy > 245 and xxx < 620 and yyy < 290 then
-        drawbox (365, 245, 620, 290, Rand.Int (0, 255))
+        drawbox (365, 245, 620, 290, white)
         if button = 1 then
             controls
         end if
     elsif xxx > 379 and yyy > 195 and xxx < 612 and yyy < 240 then
-        drawbox (379, 195, 612, 240, Rand.Int (0, 255))
+        drawbox (379, 195, 612, 240, white)
         if button = 1 then
             scorescreen
         end if
     elsif xxx > 450 and yyy > 140 and xxx < 537 and yyy < 188 then
-        drawbox (450, 143, 540, 188, Rand.Int (0, 255))
+        drawbox (450, 143, 540, 188, white)
         if button = 1 then
             exit
         end if
