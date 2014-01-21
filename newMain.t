@@ -109,14 +109,16 @@ fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
         result a
 end loadPics2
 
-%var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
-var * doorPic := Pic.FileNew("Graphics/door_closed.bmp")
-var * wallPic := Pic.FileNew("Graphics/wall.bmp")
-var * groundPic := Pic.FileNew("Graphics/ground.bmp")
-var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove := loadPics2("mage")
-var * gobMove := loadPics2("troll")
-var * fire := loadPics("fire")
+%var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
+var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
+var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
+var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
+var * superkey := Pic.FileNew ("Graphics/superkey.bmp")
+var * key := Pic.FileNew ("Graphics/key.bmp"
+var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
+var * wizMove := loadPics2 ("mage")
+var * gobMove := loadPics2 ("troll")
+var * fire := loadPics ("fire")
 
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -271,6 +273,7 @@ class * wizard
     var mana := 100.0
     var items : flexible array 1..0 of ^item
     var wdsa : array 1..4 of char := init('w','d','s','a')
+    var superK : array 1 .. 4 of boolean := init (false, false, false, false)
     
     proc heal
         if mana > 0 then
@@ -382,7 +385,7 @@ class * goblin
     end draw
 end goblin
 
-
+% Boss Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * boss
     inherit goblin
@@ -393,10 +396,10 @@ class * boss
     var col := blue
     
     body proc update
-        if ~canHit and step := 75 then
+        if ~canHit and step = 75 then
             canHit := true
             step := 0
-        elsif canHit and step := 50 then
+        elsif canHit and step = 50 then
             canHit := false
             step := 0
         end if
@@ -413,7 +416,7 @@ class * boss
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
         Font.Draw("Boss:", 60, 60, smaller, black)
-        Draw.FillBox(80, 64, 10*health, 70, brightred)
+        Draw.FillBox(80, 64, round(10*health), 70, brightred)
     end draw
 end boss
 
