@@ -110,7 +110,7 @@ fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
 end loadPics2
 
 %var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
-var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
+var * doorPic := %Pic.FileNew ("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
 var * superkey := Pic.FileNew ("Graphics/superkey.bmp")
@@ -227,11 +227,11 @@ end item
 
 class * keyType
     export super
-
+    
     var super : boolean
-
+    
     deferred proc draw
-
+    
 end keyType
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -618,10 +618,10 @@ module game
                 free m(i)
             end if
         end for
-        for i : 1..upper(a)
+            for i : 1..upper(a)
             m(i) := a(i)
         end for
-        new m, upper(a)
+            new m, upper(a)
     end sweep
     
     proc update
