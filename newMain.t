@@ -24,7 +24,7 @@ var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
 var * big := Font.New ("Impact:62:Bold")
 var * small := Font.New ("Impact:28")
-var * xThing, yThing, button: int
+var * xxx, yyy, button: int
 
 type scoredata :
 record
@@ -229,7 +229,7 @@ class * keyType
     export super
 
     var super : boolean
-    
+
     deferred proc draw
 
 end keyType
@@ -707,13 +707,15 @@ proc gamerun
             score -= 1
             step := 0
         end if
-        lose := score = 0
+        if score = 0 then
+            lose := true
+        end if
         game.draw
         View.Update
         cls
         Time.DelaySinceLast (16)
         step += 1
-        exit when lose or wonTheGame
+        exit when lose
     end loop
     playerscore.scor := score
     game.gameover
@@ -770,18 +772,18 @@ proc letterEnter
     Font.Draw (chr (letter), 200, 180, big, white)
     
     loop
-        buttonwait ("down", xThing, yThing, button, button)
-        if clickCheck (xThing, yThing, 100, 200, 150, 250) and letter > 65 and button = 1 then
+        buttonwait ("down", xxx, yyy, button, button)
+        if clickCheck (xxx, yyy, 100, 200, 150, 250) and letter > 65 and button = 1 then
             letter -= 1
             drawfillbox (180, 150, 270, 250, black)
             Font.Draw (chr (letter), 200, 180, big, white)
         end if
-        if clickCheck (xThing, yThing, 300, 200, 350, 250) and letter < 90 and button = 1 then
+        if clickCheck (xxx, yyy, 300, 200, 350, 250) and letter < 90 and button = 1 then
             letter += 1
             drawfillbox (180, 150, 270, 250, black)
             Font.Draw (chr (letter), 200, 180, big, white)
         end if
-        if clickCheck (xThing, yThing, 200, 100, 250, 150) and button = 1 then
+        if clickCheck (xxx, yyy, 200, 100, 250, 150) and button = 1 then
             playerscore.name += chr (letter)
             Font.Draw (playerscore.name, 150, 260, big, white)
             lettercount += 1
@@ -807,8 +809,8 @@ proc controls
     Font.Draw ("Return", 850, 10, small, white)
     View.Update
     loop
-        mousewhere (xThing, yThing, button)
-        if xThing > 850 and yThing > 5 and xThing < 1000 and yThing < 50 then
+        mousewhere (xxx, yyy, button)
+        if xxx > 850 and yyy > 5 and xxx < 1000 and yyy < 50 then
             drawbox (845, 5, 955, 45, white)
             if button = 1 then
                 exit
@@ -871,8 +873,8 @@ proc scorescreen
     View.Update
     
     loop
-        mousewhere (xThing, yThing, button)
-        if xThing > 400 and yThing > 5 and xThing < 575 and yThing < 50 then
+        mousewhere (xxx, yyy, button)
+        if xxx > 400 and yyy > 5 and xxx < 575 and yyy < 50 then
             drawbox (400, 5, 575, 50, white)
             if button = 1 then
                 exit
@@ -897,24 +899,24 @@ loop
     Font.Draw ("HIGH SCORES", 384, 200, normal, white)
     Font.Draw ("QUIT", 455, 150, normal, white)
     
-    mousewhere (xThing, yThing, button)
-    if xThing > 452 and yThing > 295 and xThing < 540 and yThing < 340 then
+    mousewhere (xxx, yyy, button)
+    if xxx > 452 and yyy > 295 and xxx < 540 and yyy < 340 then
         drawbox (452, 295, 540, 340, white)
         if button = 1 then
             gamerun
             scorescreen
         end if
-    elsif xThing > 365 and yThing > 245 and xThing < 620 and yThing < 290 then
+    elsif xxx > 365 and yyy > 245 and xxx < 620 and yyy < 290 then
         drawbox (365, 245, 620, 290, white)
         if button = 1 then
             controls
         end if
-    elsif xThing > 379 and yThing > 195 and xThing < 612 and yThing < 240 then
+    elsif xxx > 379 and yyy > 195 and xxx < 612 and yyy < 240 then
         drawbox (379, 195, 612, 240, white)
         if button = 1 then
             scorescreen
         end if
-    elsif xThing > 450 and yThing > 140 and xThing < 537 and yThing < 188 then
+    elsif xxx > 450 and yyy > 140 and xxx < 537 and yyy < 188 then
         drawbox (450, 143, 540, 188, white)
         if button = 1 then
             exit
