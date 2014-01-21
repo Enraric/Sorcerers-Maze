@@ -110,7 +110,7 @@ fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
 end loadPics2
 
 %var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
-var * doorPic := %Pic.FileNew ("Graphics/door_closed.bmp")
+var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
 var * superkey := Pic.FileNew ("Graphics/superkey.bmp")
