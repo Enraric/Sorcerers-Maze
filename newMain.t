@@ -18,6 +18,7 @@
 const * SPRTSZ := 48
 var * score : int := 3600
 var step : int := 0
+var * wonTheGame := false
 
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
@@ -357,7 +358,6 @@ class * goblin
     health := 1.0
     speed := 2
     damage := 0.5
-    var randmove := Rand.Int (0, 4)
     var t := w
     var mana : real := 10
     
@@ -381,6 +381,41 @@ class * goblin
         drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), green)
     end draw
 end goblin
+
+
+
+class * boss
+    inherit goblin
+    export canHit
+    health := 50.0
+    speed := 1
+    var canHit := false
+    var col := blue
+    
+    body proc update
+        if ~canHit and step := 75 then
+            canHit := true
+            step := 0
+        elsif canHit and step := 50 then
+            canHit := false
+            step := 0
+        end if
+        if canHit then
+            col := brightblue
+        else
+            col := blue
+        end if
+        isAlive := not health <= 0
+        wonTheGame := not isAlive
+    end update
+    
+    body proc draw
+        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+        Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
+        Font.Draw("Boss:", 60, 60, smaller, black)
+        Draw.FillBox(80, 64, 10*health, 70, brightred)
+    end draw
+end boss
 
 % Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
