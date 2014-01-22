@@ -238,7 +238,7 @@ end key
 class * fireball
     inherit moveable    
     speed := 8
-    damage := 10.0
+    damage := 5
     kind := mode.friend
     solid := false
     
@@ -390,19 +390,19 @@ end goblin
 class * boss
     inherit goblin
     export canHit
-    health := 50.0
+    health := 100.0
     speed := 1
     var canHit := false
     var col := blue
     
     body proc update
-        if ~canHit and step = 75 then
+        if ~canHit and step = 100 then
             canHit := true
             speed := 0
             step := 0
         elsif canHit and step = 50 then
             canHit := false
-            direct := Rand.Int(1, 4)
+            direct := getDir(pos, ^t.pos)
             speed := 1
             step := 0
         end if
@@ -415,11 +415,17 @@ class * boss
         wonTheGame := not isAlive
     end update
     
+    body proc collide
+        if ^m.kind = mode.friend and canHit then
+            health -= ^m.damage
+        end if
+    end collide
+    
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
         Font.Draw("Boss:", 60, 60, smaller, black)
-        Draw.FillBox(110, 60, round(10*health), 70, brightred)
+        Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
     end draw
 end boss
 
@@ -582,8 +588,8 @@ module game
                     new tile, t
                     spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label 'm':
-                new tile, t
-                spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    new tile, t
+                    spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -726,7 +732,7 @@ proc gamerun
         cls
         Time.DelaySinceLast (16)
         step += 1
-        exit when lose
+        exit when lose or wonTheGame
     end loop
     playerscore.scor := score
     game.gameover
