@@ -115,7 +115,7 @@ end loadPics2
 var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
-var * superkeyPic := Pic.FileNew ("Graphics/superkey.bmp")
+var * sKeyPic := Pic.FileNew ("Graphics/superkey.bmp")
 var * keyPic := Pic.FileNew ("Graphics/key.bmp")
 var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
 var * wizMove := loadPics2 ("mage")
@@ -128,7 +128,7 @@ var * keys : array char of boolean
 var * text := Font.New ("Serif:14")
 var * lose := false
 var * title := Font.New ("Serif:48:Bold")
-type * mode : enum(friend, enemy, neutral)
+type * mode : enum(friend, enemy, neutral, key)
 
 % The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -227,18 +227,19 @@ end item
 
 % Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * key
-    inherit item
-    pic := keyPic
-    
-end key
+class * superKey
+    inherit object
+    pic := sKeyPic
+    solid := false
+    kind := mode.key
+end superKey
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
     inherit moveable    
     speed := 8
-    damage := 5
+    damage := 10.0
     kind := mode.friend
     solid := false
     
@@ -297,6 +298,11 @@ class * wizard
         if ^m.kind = mode.enemy then
             health -= ^m.damage
         end if
+        for i : 1 .. 4
+            if ^m.kind = mode.key and superK (i) then
+                superK (i) := true
+            end if
+        end for
     end collide
     
     body proc update
@@ -390,19 +396,19 @@ end goblin
 class * boss
     inherit goblin
     export canHit
-    health := 100.0
+    health := 50.0
     speed := 1
     var canHit := false
     var col := blue
     
     body proc update
-        if ~canHit and step = 100 then
+        if ~canHit and step = 75 then
             canHit := true
             speed := 0
             step := 0
         elsif canHit and step = 50 then
             canHit := false
-            direct := getDir(pos, ^t.pos)
+            direct := Rand.Int(1, 4)
             speed := 1
             step := 0
         end if
@@ -415,17 +421,11 @@ class * boss
         wonTheGame := not isAlive
     end update
     
-    body proc collide
-        if ^m.kind = mode.friend and canHit then
-            health -= ^m.damage
-        end if
-    end collide
-    
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
         Font.Draw("Boss:", 60, 60, smaller, black)
-        Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
+        Draw.FillBox(110, 60, round(10*health), 70, brightred)
     end draw
 end boss
 
@@ -520,6 +520,12 @@ module game
         View.Update
     end gameover
     
+    proc spawnSKey(pos : point)
+        new m, upper(m)+1
+        new superKey, m(upper(m))
+        m(upper(m)) -> setXY(pos)
+    end spawnSKey
+    
     proc spawnGoblin(pos : point)
         new m, upper(m)+1
         new goblin, m(upper(m))
@@ -590,6 +596,9 @@ module game
                 label 'm':
                     new tile, t
                     spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                label 'z':
+                    new tile, t
+                    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -732,7 +741,7 @@ proc gamerun
         cls
         Time.DelaySinceLast (16)
         step += 1
-        exit when lose or wonTheGame
+        exit when lose
     end loop
     playerscore.scor := score
     game.gameover
