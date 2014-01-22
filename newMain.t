@@ -19,6 +19,7 @@ const * SPRTSZ := 48
 var * score : int := 3600
 var step : int := 0
 var * wonTheGame := false
+var * numKeys : 1..5
 
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
@@ -225,14 +226,11 @@ end item
 
 % Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * keyType
-    export super
+class * key
+    inherit item
+    pic := keyPic
     
-    var super : boolean
-    
-    deferred proc draw
-    
-end keyType
+end key
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
