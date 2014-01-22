@@ -20,6 +20,7 @@ var * score : int := 3600
 var step : int := 0
 var * wonTheGame := false
 var * numKeys : 1..5
+var * numSuperKeys : 1..4
 
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
@@ -114,8 +115,8 @@ end loadPics2
 var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
-var * superkey := Pic.FileNew ("Graphics/superkey.bmp")
-var * key := Pic.FileNew ("Graphics/key.bmp")
+var * superkeyPic := Pic.FileNew ("Graphics/superkey.bmp")
+var * keyPic := Pic.FileNew ("Graphics/key.bmp")
 var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
 var * wizMove := loadPics2 ("mage")
 var * gobMove := loadPics2 ("troll")
