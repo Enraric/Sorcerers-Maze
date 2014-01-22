@@ -517,15 +517,27 @@ module game
     proc gameover
         cls
         drawfillbox (0, 0, maxx, maxy, black)
-        Font.Draw ("Game Over", 300, 350, title, white)
+        Font.Draw ("Game Over", 300, 350, big, white)
         View.Update
+        delay (5000)
     end gameover
     
+    proc victory
+        cls
+        for i : 1 .. 500
+            drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
+            Font.Draw ("Victory!", 320, 350, big, Rand.Int (0, 255))
+            View.Update
+        end for
+    end victory 
+    
+    /*
     proc spawnSKey(pos : point)
-        new m, upper(m)+1
-        new superKey, m(upper(m))
-        m(upper(m)) -> setXY(pos)
+    new m, upper(m)+1
+    new superKey, m(upper(m))
+    m(upper(m)) -> setXY(pos)
     end spawnSKey
+    */
     
     proc spawnGoblin(pos : point)
         new m, upper(m)+1
@@ -597,9 +609,9 @@ module game
                 label 'm':
                     new tile, t
                     spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
-                label 'z':
-                    new tile, t
-                    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    %label 'z':
+                    %    new tile, t
+                    %    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -743,9 +755,15 @@ proc gamerun
         Time.DelaySinceLast (16)
         step += 1
         exit when lose
+        exit when wonTheGame
     end loop
     playerscore.scor := score
-    game.gameover
+    if lose then
+        game.gameover
+    end if
+    if wonTheGame then
+        game.victory
+    end if
 end gamerun
 
 % Function for clicking buttons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
