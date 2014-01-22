@@ -732,7 +732,6 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-    Music.PlayFileLoop("Music/Geothermal.mp3")
     game.initialize("C3") 
     
     loop
@@ -935,6 +934,7 @@ end scorescreen
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
+Music.PlayFileLoop("Music/Geothermal.mp3")
 
 loop    
     Pic.ScreenLoad ("Graphics/back.jpg", -10, -10, picMerge)
