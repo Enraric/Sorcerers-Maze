@@ -1,10 +1,9 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TO DO LIST (in no particular order)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FIX FIREBALLS / SOME DOORS DONT WORK %
 % Locking doors + keys                 %
 % Superdoors + Superkeys               %
-% Goblin AI + arrows                   %
 % Goblin Mother                        %
 % Win Conditions                       %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,7 +19,32 @@
 const * SPRTSZ := 48
 var * score : int := 3600
 var step : int := 0
+var * wonTheGame := false
+var * numKeys : 1..5
+var * numSuperKeys : 1..4
 
+var * smaller := Font.New ("Impact:14")
+var * normal := Font.New ("Impact:32")
+var * big := Font.New ("Impact:62:Bold")
+var * small := Font.New ("Impact:28")
+var * xxx, yyy, button: int
+
+type scoredata :
+record
+    name : string (3)
+    scor : int
+end record
+
+var playerscore : scoredata
+var scores : array 1 .. 10 of scoredata
+
+playerscore.scor := 0
+
+for i : 1 .. 10
+    scores(i).name := "CPU"
+    scores(i).scor := 0
+end for
+    
 % Stuff for Collision Detection %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 type * point:
@@ -88,14 +112,16 @@ fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
         result a
 end loadPics2
 
-%var * potPic := Pic.FileNew("Graphics/health_potion.bmp")
-var * doorPic := Pic.FileNew("Graphics/door_closed.bmp")
-var * wallPic := Pic.FileNew("Graphics/wall.bmp")
-var * groundPic := Pic.FileNew("Graphics/ground.bmp")
-var * wizIdle := Pic.FileNew("Graphics/mage_idle.bmp")
-var * wizMove := loadPics2("mage")
-var * gobMove := loadPics2("troll")
-var * fire := loadPics("fire")
+%var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
+var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
+var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
+var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
+var * superkeyPic := Pic.FileNew ("Graphics/superkey.bmp")
+var * keyPic := Pic.FileNew ("Graphics/key.bmp")
+var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
+var * wizMove := loadPics2 ("mage")
+var * gobMove := loadPics2 ("troll")
+var * fire := loadPics ("fire")
 
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -163,7 +189,7 @@ class * moveable
     end defCollide
 end moveable
 
-% The parent class for all things on-screen that DON'T move %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The parent class for all things on-screen that DON'T move %%%%%% Like keys? Hmmm... %%%%%%%%%%%%%%
 
 class * tile
     inherit object
@@ -202,20 +228,18 @@ end item
 
 % Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-class * potion
+class * key
     inherit item
+    pic := keyPic
     
-    body proc use
-        
-    end use
-end potion
+end key
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
     inherit moveable    
     speed := 8
-    damage := 50.0
+    damage := 5
     kind := mode.friend
     solid := false
     
@@ -250,6 +274,7 @@ class * wizard
     var mana := 100.0
     var items : flexible array 1..0 of ^item
     var wdsa : array 1..4 of char := init('w','d','s','a')
+    var superK : array 1 .. 4 of boolean := init (false, false, false, false)
     
     proc heal
         if mana > 0 then
@@ -337,15 +362,15 @@ class * goblin
     health := 1.0
     speed := 2
     damage := 0.5
-    var randmove := Rand.Int (0, 4)
     var t := w
+    var mana : real := 10
     
     body proc update
         direct := getDir(pos, ^t.pos)
         pic := gobMove(direct)(((step div 10) mod 2)+1)
         isAlive := not health <= 0
         if isAlive = false then
-            score += 10
+            score += 15
         end if
     end update
     
@@ -360,6 +385,50 @@ class * goblin
         drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), green)
     end draw
 end goblin
+
+% Boss Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+class * boss
+    inherit goblin
+    export canHit
+    health := 100.0
+    speed := 1
+    var canHit := false
+    var col := blue
+    
+    body proc update
+        if ~canHit and step = 100 then
+            canHit := true
+            speed := 0
+            step := 0
+        elsif canHit and step = 50 then
+            canHit := false
+            direct := getDir(pos, ^t.pos)
+            speed := 1
+            step := 0
+        end if
+        if canHit then
+            col := brightblue
+        else
+            col := blue
+        end if
+        isAlive := not health <= 0
+        wonTheGame := not isAlive
+    end update
+    
+    body proc collide
+        if ^m.kind = mode.friend and canHit then
+            health -= ^m.damage
+        end if
+    end collide
+    
+    body proc draw
+        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+        Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
+        Font.Draw("Boss:", 60, 60, smaller, black)
+        Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
+    end draw
+end boss
 
 % Room Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -458,12 +527,20 @@ module game
         m(upper(m)) -> setXY(pos)
     end spawnGoblin
     
+    proc spawnBoss (pos : point)
+        new m, upper(m)+1
+        new boss, m(upper(m))
+        m(upper(m)) -> setXY(pos)
+    end spawnBoss
+    
     proc spawnFireball(i : int)
         if ^w.useMana(10) then
             new m, upper(m)+1
             new fireball, m(upper(m))
             m(upper(m)) -> direct := i
             m(upper(m)) -> setXY(^w.pos)
+            m(upper(m)) -> move(i, 49)
+            var tmp := checkColl_tile (m(upper(m)), level -> getTile (m(upper(m)) -> pos.x div 48, m(upper(m)) -> pos.y div 48))
         end if
     end spawnFireball
     
@@ -510,7 +587,10 @@ module game
                     d(upper(d)) := t
                 label 'g':
                     new tile, t
-                    %spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                label 'm':
+                    new tile, t
+                    spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -628,32 +708,239 @@ proc pausescreen
     end loop
 end pausescreen
 
-% Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc gamerun
+    %Music.PlayFileLoop("ScienceBlaster.mp3")
+    game.initialize("C3") 
+    
+    loop
+        Input.KeyDown (keys)
+        game.update
+        if keys ('p') then
+            pausescreen
+            delay (50)
+        end if
+        if step = 5 then
+            score -= 1
+            step := 0
+        end if
+        if score = 0 then
+            lose := true
+        end if
+        game.draw
+        View.Update
+        cls
+        Time.DelaySinceLast (16)
+        step += 1
+        exit when lose or wonTheGame
+    end loop
+    playerscore.scor := score
+    game.gameover
+end gamerun
+
+% Function for clicking buttons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function clickCheck (x, y, x1, y1, x2, y2 : int) : boolean
+    result (x > x1) and (x < x2) and (y > y1) and (y < y2)
+end clickCheck
+
+% Procedure for entering high score name %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc letterEnter
+    
+    var s := 1
+    s := Window.Open ("graphics:450;400")
+    drawfillbox(0, 0, 1000, 1000, black)
+    
+    var letter : int := 65
+    var finish : boolean := false
+    var lettercount : int := 0
+    
+    playerscore.name := ""
+    
+    Font.Draw ("High Score! Enter your name.", 10, 350, small, white)
+    
+    % Left Arrow
+    drawbox (100, 200, 150, 250, white)
+    drawline (140, 210, 120, 210, white)
+    drawline (120, 210, 110, 225, white)
+    drawline (110, 225, 120, 240, white)
+    drawline (120, 240, 140, 240, white)
+    drawline (140, 240, 140, 210, white)
+    
+    % Right Arrow
+    drawbox (300, 200, 350, 250, white)
+    drawline (310, 210, 330, 210, white)
+    drawline (330, 210, 340, 225, white)
+    drawline (340, 225, 330, 240, white)
+    drawline (330, 240, 310, 240, white)
+    drawline (310, 240, 310, 210, white)
+    
+    % Enter Box
+    drawbox (200, 100, 250, 150, white)
+    drawline (210, 140, 210, 110, white)
+    drawline (210, 110, 230, 110, white)
+    drawline (230, 110, 240, 115, white)
+    drawline (240, 115, 230, 120, white)
+    drawline (230, 120, 220, 120, white)
+    drawline (220, 120, 220, 140, white)
+    drawline (220, 140, 210, 140, white)
+    
+    Font.Draw (chr (letter), 200, 180, big, white)
+    
+    loop
+        buttonwait ("down", xxx, yyy, button, button)
+        if clickCheck (xxx, yyy, 100, 200, 150, 250) and letter > 65 and button = 1 then
+            letter -= 1
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
+        end if
+        if clickCheck (xxx, yyy, 300, 200, 350, 250) and letter < 90 and button = 1 then
+            letter += 1
+            drawfillbox (180, 150, 270, 250, black)
+            Font.Draw (chr (letter), 200, 180, big, white)
+        end if
+        if clickCheck (xxx, yyy, 200, 100, 250, 150) and button = 1 then
+            playerscore.name += chr (letter)
+            Font.Draw (playerscore.name, 150, 260, big, white)
+            lettercount += 1
+        end if
+        exit when lettercount = 3
+    end loop
+    
+    Window.Close (s)
+end letterEnter
+
+% Intructions Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc controls
+    cls
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Intructions", 300, 600, big, white)
+    Font.Draw ("Use WASD to move", 10, 450, normal, white)
+    Font.Draw ("Tap the arrow keys to throw fire (requires mana)", 10, 400, normal, white)
+    Font.Draw ("Hold the space bar to heal (requires mana)", 10, 350, normal, white)
+    Font.Draw ("Tap P to pause and unpause", 10, 300, normal, white)
+    Font.Draw ("Find the four magic keys to escape", 10, 250, normal, white)
+    Font.Draw ("Some doors require regular keys", 10, 200, normal, white)
+    Font.Draw ("Return", 850, 10, small, white)
+    View.Update
+    loop
+        mousewhere (xxx, yyy, button)
+        if xxx > 850 and yyy > 5 and xxx < 1000 and yyy < 50 then
+            drawbox (845, 5, 955, 45, white)
+            if button = 1 then
+                exit
+            end if
+        end if
+        View.Update
+    end loop
+end controls
+
+% High Score Sorting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc scoresort
+    var temp : int
+    
+    for i : 1 .. 10
+        for decreasing j : 10 .. 2
+            if scores(j).scor > scores(j - 1).scor then
+                var tempscore := scores(j)
+                scores(j) := scores(j - 1)
+                scores(j - 1) := tempscore
+            end if
+        end for
+    end for
+        
+    var f1 : int    
+    open : f1, "scores", write
+    for i : 1 .. 10
+        write : f1, scores (i)
+    end for
+        close : f1
+end scoresort
+
+% The High Score Screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+proc scorescreen
+    var f1 : int
+    open : f1, "scores", read
+    for i : 1 .. 10
+        read : f1, scores (i)
+    end for
+        close: f1
+    
+    if playerscore.scor > scores(10).scor then
+        letterEnter
+        scores(10) := playerscore
+        scoresort
+    end if
+    
+    cls
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Name", 10, 600, big, white)
+    Font.Draw ("Score", 750, 600, big, white)
+    
+    for i : 1 .. 10
+        Font.Draw (scores (11-i).name, 10, 45 * i + 105, normal, white)
+        Font.Draw (intstr (scores (11-i).scor), 750, 45 * i + 105, normal, white)
+    end for
+        
+    Font.Draw ("Main Menu" , 405, 13, small, white)
+    View.Update
+    
+    loop
+        mousewhere (xxx, yyy, button)
+        if xxx > 400 and yyy > 5 and xxx < 575 and yyy < 50 then
+            drawbox (400, 5, 575, 50, white)
+            if button = 1 then
+                exit
+            end if
+        end if
+        View.Update
+    end loop
+    
+    playerscore.scor := 0
+    playerscore.name := ""
+end scorescreen
+
+% Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
 
-game.initialize("C3") 
-
-loop
-    Input.KeyDown (keys)
-    game.update
-    if keys ('p') then
-        pausescreen
-        delay (50)
+loop    
+    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
+    Font.Draw ("PLAY", 457, 300, normal, white)
+    Font.Draw ("INSTRUCTIONS", 370, 250, normal, white)
+    Font.Draw ("HIGH SCORES", 384, 200, normal, white)
+    Font.Draw ("QUIT", 455, 150, normal, white)
+    
+    mousewhere (xxx, yyy, button)
+    if xxx > 452 and yyy > 295 and xxx < 540 and yyy < 340 then
+        drawbox (452, 295, 540, 340, white)
+        if button = 1 then
+            gamerun
+            scorescreen
+        end if
+    elsif xxx > 365 and yyy > 245 and xxx < 620 and yyy < 290 then
+        drawbox (365, 245, 620, 290, white)
+        if button = 1 then
+            controls
+        end if
+    elsif xxx > 379 and yyy > 195 and xxx < 612 and yyy < 240 then
+        drawbox (379, 195, 612, 240, white)
+        if button = 1 then
+            scorescreen
+        end if
+    elsif xxx > 450 and yyy > 140 and xxx < 537 and yyy < 188 then
+        drawbox (450, 143, 540, 188, white)
+        if button = 1 then
+            exit
+        end if
     end if
-    if step = 4 then
-        score -= 1
-        step := 0
-    end if
-    if score = 0 then
-        lose := true
-    end if
-    game.draw
     View.Update
-    cls
-    Time.DelaySinceLast (16)
-    step += 1
-    exit when lose
 end loop
 
-game.gameover
+Window.Hide (-1)

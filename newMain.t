@@ -1,3 +1,4 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TO DO LIST (in no particular order)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -719,7 +720,7 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-    %Music.PlayFileLoop("ScienceBlaster.mp3")
+    Music.PlayFileLoop("Music/Geothermal.mp3")
     game.initialize("C3") 
     
     loop
@@ -824,7 +825,7 @@ end letterEnter
 
 proc controls
     cls
-    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Pic.ScreenLoad ("Graphics/back.jpg", -10, -10, picMerge)
     Font.Draw ("Intructions", 300, 600, big, white)
     Font.Draw ("Use WASD to move", 10, 450, normal, white)
     Font.Draw ("Tap the arrow keys to throw fire (requires mana)", 10, 400, normal, white)
@@ -886,7 +887,7 @@ proc scorescreen
     end if
     
     cls
-    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Pic.ScreenLoad ("Graphics/back.jpg", -10, -10, picMerge)
     Font.Draw ("Name", 10, 600, big, white)
     Font.Draw ("Score", 750, 600, big, white)
     
@@ -918,7 +919,7 @@ end scorescreen
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
 
 loop    
-    Pic.ScreenLoad ("back.jpg", -10, -10, picMerge)
+    Pic.ScreenLoad ("Graphics/back.jpg", -10, -10, picMerge)
     Font.Draw ("Sorcerer's Maze", 210, 600, big, white)
     Font.Draw ("PLAY", 457, 300, normal, white)
     Font.Draw ("INSTRUCTIONS", 370, 250, normal, white)
