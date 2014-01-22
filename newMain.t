@@ -294,7 +294,7 @@ class * wizard
     end useMana
     
     body proc collide
-        if ^m.kind = mode.enemy or ^m.kind = mode.friend then
+        if ^m.kind = mode.enemy then
             health -= ^m.damage
         end if
     end collide
@@ -416,7 +416,7 @@ class * boss
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
         Font.Draw("Boss:", 60, 60, smaller, black)
-        Draw.FillBox(80, 64, round(10*health), 70, brightred)
+        Draw.FillBox(110, 60, round(10*health), 70, brightred)
     end draw
 end boss
 
@@ -485,8 +485,6 @@ module game
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var m : flexible array 1..0 of ^moveable
     var level : ^room
-    var b : ^boss
-    var spawnedBoss := false
     var lastLevel, currentLevel := ""
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
@@ -518,6 +516,12 @@ module game
         new goblin, m(upper(m))
         m(upper(m)) -> setXY(pos)
     end spawnGoblin
+    
+    proc spawnBoss (pos : point)
+        new m, upper(m)+1
+        new boss, m(upper(m))
+        m(upper(m)) -> setXY(pos)
+    end spawnBoss
     
     proc spawnFireball(i : int)
         if ^w.useMana(10) then
@@ -574,6 +578,9 @@ module game
                 label 'g':
                     new tile, t
                     spawnGoblin(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                label 'm':
+                new tile, t
+                spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
