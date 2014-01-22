@@ -485,6 +485,8 @@ module game
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var m : flexible array 1..0 of ^moveable
     var level : ^room
+    var b : ^boss
+    var spawnedBoss := false
     var lastLevel, currentLevel := ""
     
     fcn checkColl(m1, m2 : ^moveable) : boolean
