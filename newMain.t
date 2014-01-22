@@ -398,9 +398,12 @@ class * boss
     body proc update
         if ~canHit and step = 75 then
             canHit := true
+            speed := 0
             step := 0
         elsif canHit and step = 50 then
             canHit := false
+            direct := Rand.Int(1, 4)
+            speed := 1
             step := 0
         end if
         if canHit then
