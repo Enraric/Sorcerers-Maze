@@ -1,13 +1,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TO DO LIST (in no particular order)  %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Locking doors + keys                 %
-% Superdoors + Superkeys               %
-% Goblin Mother                        %
-% Win Conditions                       %
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Sorcerer's Maze                      %
 % Programmed by Alexander McMorine III %
 % and Ian Frosst                       %
