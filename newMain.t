@@ -20,8 +20,7 @@ var * score : int := 9999
 var step : int := 0
 var * wonTheGame := false
 var * numKeys : 0..5 := 0
-var * numSuperKeys : 0..4 := 0
-
+var * ccc : array 1..4 of boolean := init(false, false, false, false)
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
 var * big := Font.New ("Impact:62:Bold")
@@ -236,12 +235,12 @@ class * superKey
     body proc collide
         if ^m.kind = mode.neutral then
             isAlive := false
-            numSuperKeys += 1
+            ccc(direct) := true
         end if
     end collide
 end superKey
 
-% Asd %%%
+% Super Key item for inventory %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * superKey_item
     inherit item
@@ -489,7 +488,7 @@ end lockDoor
 class * superDoor
         inherit lockDoor
         pic := sDoorPic
-    canEnter := numSuperKeys = 4
+    canEnter := ccc(1) and ccc(2) and ccc(3) and ccc(4)
 end superDoor
     
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -537,10 +536,11 @@ module game
         end for
     end victory 
     
-    proc spawnSKey(pos : point)
+    proc spawnSKey(num : 1..4, pos : point)
         new m, upper(m)+1
         new superKey, m(upper(m))
         m(upper(m)) -> setXY(pos)
+        m(upper(m)) -> direct := num
     end spawnSKey
     
     proc spawnGoblin(pos : point)
@@ -613,11 +613,14 @@ module game
                 label 'm':
                     new tile, t
                     spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
-                label 'z':
-                    new tile, t
-                    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
+                    if line(x+1) = '1' or line(x+1) = '2' or line(x+1) = '3' or line(x+1) = '4' then
+                        var u := strint(line(x+1))
+                        if ~ccc(u) then
+                            spawnSKey(u, newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                        end if
+                    end if
                 end case
                 level -> setTile(x, y, t)
             end for
