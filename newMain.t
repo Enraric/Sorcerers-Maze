@@ -428,7 +428,7 @@ class * boss
     end collide
     
     body proc draw
-        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
         Font.Draw("Boss:", 60, 60, smaller, black)
         Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
     end draw
