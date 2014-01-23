@@ -19,8 +19,8 @@ const * SPRTSZ := 48
 var * score : int := 9999
 var step : int := 0
 var * wonTheGame := false
-var * numKeys : 1..5
-var * numSuperKeys : 1..4
+var * numKeys : 0..5 := 0
+var * numSuperKeys : 0..4 := 0
 
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
@@ -113,6 +113,7 @@ end loadPics2
 
 %var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
 var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
+var * sDoorPic := Pic.FileNew("Graphics/superdoor.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
 var * sKeyPic := Pic.FileNew ("Graphics/superkey.bmp")
@@ -202,10 +203,11 @@ end moveable
 
 class * tile
     inherit object
-    export var filename, sDraw
+    export var filename, canEnter, sDraw
     solid := false
     pic := groundPic
-    var filename : string    
+    var filename : string
+    var canEnter : boolean   
     
     proc sDraw(i : int)
         var c := blue
@@ -239,10 +241,11 @@ class * superKey
     solid := false
     kind := mode.key
     body proc collide
-    if ^m.type = mode.neutral then
-        isAlive := false
-        numSuperKeys += 1
-    end if
+        if ^m.kind = mode.neutral then
+            isAlive := false
+            numSuperKeys += 1
+        end if
+    end collide
 end superKey
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -479,6 +482,7 @@ end room
 
 class * door
         inherit tile
+    canEnter := true
     pic := doorPic
     solid := true
 end door
@@ -489,6 +493,8 @@ end lockDoor
     
 class * superDoor
         inherit lockDoor
+        pic := sDoorPic
+    canEnter := numSuperKeys = 4
 end superDoor
     
 % Game Controller %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -526,6 +532,15 @@ module game
         Font.Draw ("Game Over", 300, 350, title, white)
         View.Update
     end gameover
+    
+    proc victory
+        cls
+        for i : 1 .. 500
+            drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
+            Font.Draw ("Victory!", 320, 350, big, Rand.Int (0, 255))
+            View.Update
+        end for
+    end victory 
     
     proc spawnSKey(pos : point)
         new m, upper(m)+1
@@ -677,8 +692,10 @@ module game
             %c(i) -> sDraw(i)
             if checkColl_tile(w, c(i)) then
                 if objectclass(c(i)) >= door then
-                    lastLevel := currentLevel
-                    loadLevel(c(i) -> filename)
+                    if c(i) -> canEnter then
+                        lastLevel := currentLevel
+                        loadLevel(c(i) -> filename)
+                    end if
                 end if
             end if
         end for
@@ -751,7 +768,11 @@ proc gamerun
         exit when lose or wonTheGame
     end loop
     playerscore.scor := score
-    game.gameover
+    if wonTheGame then
+        game.victory
+    elsif lose then
+        game.gameover
+    end if
 end gamerun
 
 % Function for clicking buttons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
