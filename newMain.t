@@ -973,5 +973,5 @@ loop
     end if
     View.Update
 end loop
-
+Music.PlayFileStop
 Window.Hide (-1)
