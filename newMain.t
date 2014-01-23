@@ -30,7 +30,7 @@ var scores : array 1 .. 10 of scoredata
 playerscore.scor := 0
 
 for i : 1 .. 10
-    scores(i).name := "CPU"
+    scores(i).name := ""
     scores(i).scor := 0
 end for
     
@@ -212,7 +212,7 @@ class * item
     deferred proc use
     
     proc draw(i : int)
-        Pic.Draw(pic, 48 * i + 270, maxy-50, picMerge)
+        Pic.Draw(pic, 48 * i + 270, maxy-54, picMerge)
     end draw
 end item
 
