@@ -241,6 +241,13 @@ class * superKey
     end collide
 end superKey
 
+% Asd %%%
+
+class * superKey_item
+    inherit item
+    pic := sKeyPic
+end superKey_item
+
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * fireball
@@ -299,6 +306,9 @@ class * wizard
     body proc collide
         if ^m.kind = mode.enemy then
             health -= ^m.damage
+        elsif ^m.kind = mode.key then
+            new items, upper (items)+1
+            new superKey_item, items(upper (items))
         end if
     end collide
     
