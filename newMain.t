@@ -243,6 +243,7 @@ class * superKey
     if ^m.type = mode.neutral then
         isAlive := false
         numSuperKeys += 1
+    end if
 end superKey
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -304,12 +305,6 @@ class * wizard
     body proc collide
         if ^m.kind = mode.enemy then
             health -= ^m.damage
-        elsif ^m.kind = mode.key then
-            for i : 1..4
-                if superK(i) then % I'm really not sure what you're trying to do here...
-                    superK(i) := true
-                end if
-            end for
         end if
     end collide
     
