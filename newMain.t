@@ -121,6 +121,8 @@ var * keyPic := Pic.FileNew ("Graphics/key.bmp")
 var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
 var * wizMove := loadPics2 ("mage")
 var * gobMove := loadPics2 ("troll")
+var * bossIdle := Pic.FileNew ("Graphics/boss_idle.bmp")
+var * bossMove := loadPics2 ("boss")
 var * fire := loadPics ("fire")
 
 % Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -399,7 +401,6 @@ class * boss
     health := 100.0
     speed := 1
     var canHit := false
-    var col := blue
     
     body proc update
         if ~canHit and step = 100 then
@@ -412,10 +413,9 @@ class * boss
             speed := 1
             step := 0
         end if
+        pic := bossMove(direct)(((step div 15) mod 2)+1)
         if canHit then
-            col := brightblue
-        else
-            col := blue
+            pic := bossIdle
         end if
         isAlive := not health <= 0
         wonTheGame := not isAlive
@@ -428,8 +428,7 @@ class * boss
     end collide
     
     body proc draw
-        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
-        Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Font.Draw("Boss:", 60, 60, smaller, black)
         Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
     end draw
