@@ -902,7 +902,7 @@ proc scorescreen
     end for
         close: f1
     
-    if playerscore.scor > scores(10).scor then
+    if playerscore.scor > scores(10).scor and wonTheGame then
         letterEnter
         scores(10) := playerscore
         scoresort
