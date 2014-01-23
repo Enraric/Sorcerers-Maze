@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TO DO LIST (in no particular order)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,7 +16,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const * SPRTSZ := 48
-var * score : int := 3600
+var * score : int := 9999
 var step : int := 0
 var * wonTheGame := false
 var * numKeys : 1..5
@@ -335,8 +334,8 @@ class * wizard
     end update
     
     body proc draw
-        %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
-        Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, purple)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
+        %Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, purple)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
