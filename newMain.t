@@ -77,15 +77,6 @@ fcn * getDir(p1, p2 : point) : 1..4
     end if
 end getDir
 
-fcn * getText(s : string) : string
-    var t := Window.Open("text:2;1,nobuttonbar")
-    put s
-    var text : string
-    get text : *
-    Window.Close(t)
-    result text
-end getText
-
 % Loading Game Sprites %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
@@ -286,7 +277,6 @@ class * wizard
     var mana := 100.0
     var items : flexible array 1..0 of ^item
     var wdsa : array 1..4 of char := init('w','d','s','a')
-    var superK : array 1 .. 4 of boolean := init (false, false, false, false)
     
     proc heal
         if mana > 0 then
@@ -668,9 +658,6 @@ module game
     end sweep
     
     proc update
-        if keys('l') then
-            loadLevel(getText(""))
-        end if
         for i : 1..4
             if keys(arrowKeys(i)) then
                 if not shot(i) then
