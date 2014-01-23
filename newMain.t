@@ -16,7 +16,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 const * SPRTSZ := 48
-var * score : int := 9999
+var * score : int := 3600
 var step : int := 0
 var * wonTheGame := false
 var * numKeys : 1..5
@@ -141,9 +141,6 @@ class * object
     var damage : real := 0
     
     deferred proc draw
-    body proc draw
-        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
-    end draw
     
     proc setXY(np : point)
         pos.x := np.x
@@ -177,12 +174,7 @@ class * moveable
     end move
     
     deferred proc update
-    body proc update
-    end update
-    
     deferred proc collide(m : ^object)
-    body proc collide
-    end collide
     
     proc defUpdate
         update        
@@ -191,9 +183,7 @@ class * moveable
     end defUpdate
     
     proc defCollide(m : ^object)
-        if ^m.solid then
-            move(direct, -speed)
-        end if
+        move(direct, -speed)
         collide(m)
     end defCollide
 end moveable
@@ -206,6 +196,10 @@ class * tile
     solid := false
     pic := groundPic
     var filename : string    
+    
+    body proc draw
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
+    end draw
     
     proc sDraw(i : int)
         var c := blue
@@ -234,15 +228,10 @@ end item
 % Item Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * superKey
-    inherit moveable
+    inherit object
     pic := sKeyPic
     solid := false
     kind := mode.key
-    body proc collide
-    if ^m.type = mode.neutral then
-        isAlive := false
-        numSuperKeys += 1
-    end if
 end superKey
 
 % Fireball Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,7 +239,7 @@ end superKey
 class * fireball
     inherit moveable    
     speed := 8
-    damage := 5
+    damage := 10.0
     kind := mode.friend
     solid := false
     
@@ -266,6 +255,10 @@ class * fireball
             isAlive := false
         end if
     end collide
+    
+    body proc draw
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
+    end draw
 end fireball
 
 % Wizard Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -305,6 +298,11 @@ class * wizard
         if ^m.kind = mode.enemy then
             health -= ^m.damage
         end if
+        for i : 1 .. 4
+            if ^m.kind = mode.key and superK (i) then
+                superK (i) := true
+            end if
+        end for
     end collide
     
     body proc update
@@ -388,7 +386,8 @@ class * goblin
     end collide
     
     body proc draw
-        drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+23, pos.y+23, green)
+        Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
+        %drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+(SPRTSZ div 2), pos.y+(SPRTSZ div 2), green)
     end draw
 end goblin
 
@@ -397,19 +396,19 @@ end goblin
 class * boss
     inherit goblin
     export canHit
-    health := 100.0
+    health := 50.0
     speed := 1
     var canHit := false
     var col := blue
     
     body proc update
-        if ~canHit and step = 100 then
+        if ~canHit and step = 75 then
             canHit := true
             speed := 0
             step := 0
         elsif canHit and step = 50 then
             canHit := false
-            direct := getDir(pos, ^t.pos)
+            direct := Rand.Int(1, 4)
             speed := 1
             step := 0
         end if
@@ -422,17 +421,11 @@ class * boss
         wonTheGame := not isAlive
     end update
     
-    body proc collide
-        if ^m.kind = mode.friend and canHit then
-            health -= ^m.damage
-        end if
-    end collide
-    
     body proc draw
         %Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picCopy)
         Draw.FillBox(pos.x-48, pos.y-48, pos.x+47, pos.y+47, col)
         Font.Draw("Boss:", 60, 60, smaller, black)
-        Draw.FillBox(110, 60, 110+round(7.9*health), 70, brightred)
+        Draw.FillBox(110, 60, round(10*health), 70, brightred)
     end draw
 end boss
 
@@ -523,15 +516,27 @@ module game
     proc gameover
         cls
         drawfillbox (0, 0, maxx, maxy, black)
-        Font.Draw ("Game Over", 300, 350, title, white)
+        Font.Draw ("Game Over", 300, 350, big, white)
         View.Update
+        delay (5000)
     end gameover
     
+    proc victory
+        cls
+        for i : 1 .. 500
+            drawfillbox (0, 0, maxx, maxy, Rand.Int (0, 255))
+            Font.Draw ("Victory!", 320, 350, big, Rand.Int (0, 255))
+            View.Update
+        end for
+    end victory 
+    
+    /*
     proc spawnSKey(pos : point)
-        new m, upper(m)+1
-        new superKey, m(upper(m))
-        m(upper(m)) -> setXY(pos)
+    new m, upper(m)+1
+    new superKey, m(upper(m))
+    m(upper(m)) -> setXY(pos)
     end spawnSKey
+    */
     
     proc spawnGoblin(pos : point)
         new m, upper(m)+1
@@ -603,9 +608,9 @@ module game
                 label 'm':
                     new tile, t
                     spawnBoss(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
-                label 'z':
-                    new tile, t
-                    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
+                    %label 'z':
+                    %    new tile, t
+                    %    spawnSKey(newP((SPRTSZ div 2)+x*SPRTSZ, (SPRTSZ div 2)+y*SPRTSZ))
                 label:
                     new tile, t
                 end case
@@ -726,7 +731,6 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-    Music.PlayFileLoop("Music/Geothermal.mp3")
     game.initialize("C3") 
     
     loop
@@ -748,10 +752,16 @@ proc gamerun
         cls
         Time.DelaySinceLast (16)
         step += 1
-        exit when lose or wonTheGame
+        exit when lose
+        exit when wonTheGame
     end loop
     playerscore.scor := score
-    game.gameover
+    if lose then
+        game.gameover
+    end if
+    if wonTheGame then
+        game.victory
+    end if
 end gamerun
 
 % Function for clicking buttons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -923,6 +933,7 @@ end scorescreen
 % Main Program %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 View.Set("graphics:"+intstr(20*SPRTSZ)+";"+intstr(13*SPRTSZ+60)+",offscreenonly,nobuttonbar")
+Music.PlayFileLoop("Music/Geothermal.mp3")
 
 loop    
     Pic.ScreenLoad ("Graphics/back.jpg", -10, -10, picMerge)
