@@ -1,14 +1,14 @@
 wwwwwwwwwwwwwwwwwwww
-w                  w
-w        g   g   g w
-w  wwwww           w
+wwwwwwww           w
+wwwwwwww g   g   g w
+wwwwwwww           w
 w     gw   wwwww   w
 w     gw   wwwww   w
-d     gw g wwwww g w
-wwwwwwww   wwwww   w
+d     gw g wwwww g d
+w  wwwww   wwwww   w
 w     kw   wwwww   w
-w      w           w
-w  wwwww g   g   g w
-w                  w
+w      w     w     w
+w  wwwww g   w   g w
+w            w     w
 wwwwwwwwwwwwwwwwwwww
 B5
