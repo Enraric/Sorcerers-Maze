@@ -389,10 +389,6 @@ class * goblin
             health -= ^m.damage
         end if
     end collide
-    
-    body proc draw
-        drawfillbox (pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), pos.x+23, pos.y+23, green)
-    end draw
 end goblin
 
 % Boss Class %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
