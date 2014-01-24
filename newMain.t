@@ -6,17 +6,22 @@
 % Work Finished --/--/--               %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 const * SPRTSZ := 48
 var * score : int := 9999
 var step : int := 0
-var * wonTheGame := false
-var * numKeys : 0..5 := 0
+var * wonTheGame, lose := false
+var * keys : array char of boolean
 var * ccc : array 1..4 of boolean := init(false, false, false, false)
+var * text := Font.New ("Serif:14")
+var * title := Font.New ("Serif:48:Bold")
 var * smaller := Font.New ("Impact:14")
 var * normal := Font.New ("Impact:32")
 var * big := Font.New ("Impact:62:Bold")
 var * small := Font.New ("Impact:28")
 var * xxx, yyy, button: int
+type * mode : enum(friend, enemy, neutral, key) % for checking types of objects because objectclass sucks
 
 type scoredata :
 record
@@ -49,6 +54,7 @@ fcn * newP(x, y : int) : point
     result t
 end newP
 
+% Gets the approximate direction from one point to another
 fcn * getDir(p1, p2 : point) : 1..4
     var n := p2.y - p2.x > p1.y - p1.x
     var m := p2.y + p2.x > p1.y + p1.x
@@ -74,12 +80,12 @@ fcn loadPics(name : string) : array 1 .. 4 of array 1 .. 2 of int
     for i : 1..2
         a(1)(i) := Pic.FileNew("Graphics/"+name+"_"+intstr(i)+".bmp")
     end for
-        for i : 2..4
+    for i : 2..4
         for j : 1..2
             a(i)(j) := Pic.Rotate(a(1)(j), (5-i)*90, SPRTSZ div 2, SPRTSZ div 2)
         end for
     end for
-        result a
+    result a
 end loadPics
 
 fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
@@ -89,30 +95,20 @@ fcn loadPics2(name : string) : array 1 .. 4 of array 1 .. 2 of int
             a(i)(j) := Pic.FileNew("Graphics/"+name+"_"+intstr(i)+"_"+intstr(j)+".bmp")
         end for
     end for
-        result a
+    result a
 end loadPics2
 
-%var * potPic := Pic.FileNew ("Graphics/health_potion.bmp")
 var * doorPic := Pic.FileNew ("Graphics/door_closed.bmp")
 var * sDoorPic := Pic.FileNew("Graphics/superdoor.bmp")
 var * wallPic := Pic.FileNew ("Graphics/wall.bmp")
 var * groundPic := Pic.FileNew ("Graphics/ground.bmp")
 var * sKeyPic := Pic.FileNew ("Graphics/superkey.bmp")
-var * keyPic := Pic.FileNew ("Graphics/key.bmp")
 var * wizIdle := Pic.FileNew ("Graphics/mage_idle.bmp")
 var * wizMove := loadPics2 ("mage")
 var * gobMove := loadPics2 ("troll")
 var * bossIdle := Pic.FileNew ("Graphics/boss_idle.bmp")
 var * bossMove := loadPics2 ("boss")
 var * fire := loadPics ("fire")
-
-% Variable Declaration %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-var * keys : array char of boolean
-var * text := Font.New ("Serif:14")
-var * lose := false
-var * title := Font.New ("Serif:48:Bold")
-type * mode : enum(friend, enemy, neutral, key)
 
 % The parent class for all things on-screen %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -168,12 +164,14 @@ class * moveable
     body proc collide
     end collide
     
+    % Called every frame
     proc defUpdate
         update        
         move(direct, speed)
         step += 1
     end defUpdate
     
+    % Called when colliding with something else
     proc defCollide(m : ^object)
         if ^m.solid then
             move(direct, -speed)
@@ -330,7 +328,6 @@ class * wizard
     
     body proc draw
         Pic.Draw(pic, pos.x-(SPRTSZ div 2), pos.y-(SPRTSZ div 2), picMerge)
-        %Draw.FillBox(pos.x-24, pos.y-24, pos.x+23, pos.y+23, purple)
         Draw.FillBox (0, maxy-60, maxx, maxy, black)
         Font.Draw ("Health", 210, maxy-25, text, white)
         Font.Draw ("Mana", 210, maxy-50, text, white)
@@ -431,13 +428,14 @@ class * room
     
     var map : array 0..19, 0..12 of ^tile
     
+    % Get 3 tiles in front of a tile (for collisions)
     fcn getNear(x, y : int, dir : 1..4) : array 1..3 of ^tile
         var a : array 1..3 of ^tile
         if dir = 1 or dir = 3 then
             for i : 1..3
                 a(i) := map((x-1)+(i mod 3),(y+2)-dir)
             end for
-            else
+        else
             for i : 1..3
                 a(i) := map((x+3)-dir,(y-1)+(i mod 3))
             end for
@@ -466,19 +464,19 @@ end room
 % Door Classes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 class * door
-        inherit tile
+    inherit tile
     canEnter := true
     pic := doorPic
     solid := true
 end door
     
 class * lockDoor
-        inherit door
+    inherit door
 end lockDoor
     
 class * superDoor
-        inherit lockDoor
-        pic := sDoorPic
+    inherit lockDoor
+    pic := sDoorPic
     canEnter := ccc(1) and ccc(2) and ccc(3) and ccc(4)
 end superDoor
     
@@ -527,6 +525,8 @@ module game
         end for
     end victory 
     
+    % Spawning things into game
+
     proc spawnSKey(num : 1..4, pos : point)
         new m, upper(m)+1
         new superKey, m(upper(m))
@@ -564,20 +564,21 @@ module game
                 m(i) -> draw
             end if
         end for
-            w -> draw
+        w -> draw
         Font.Draw (intstr(score), maxx-(length(intstr(score))*10), maxy-25, text, white)
     end draw
     
+    % Loads levels from text files
     proc loadLevel(filename : string)
         for i : 1..upper(m)
             free m(i)
         end for
-            new m, 0
+        new m, 0
         currentLevel := filename
         
         var f : int
         var d : flexible array 1..0 of ^door
-            open : f, "Levels/"+filename+".txt", get
+        open : f, "Levels/"+filename+".txt", get
         for decreasing y : 12..0
             var line : string
             get : f, line : *
@@ -616,12 +617,12 @@ module game
                 level -> setTile(x, y, t)
             end for
         end for
-            for i : 1..upper(d)
+        for i : 1..upper(d)
             var fname : string
             get : f, fname
             d(i) -> filename := fname
         end for
-            close : f
+        close : f
         if lastLevel = "" then
             w -> setXY(newP(9*48 + 24, 6*48 + 24))
         else
@@ -645,6 +646,7 @@ module game
         loadLevel(levelName)
     end initialize
     
+    % Removes dead moveables from list
     proc sweep
         var a : flexible array 1..0 of ^moveable
         for i : 1..upper(m)
@@ -655,10 +657,10 @@ module game
                 free m(i)
             end if
         end for
-            for i : 1..upper(a)
+        for i : 1..upper(a)
             m(i) := a(i)
         end for
-            new m, upper(a)
+        new m, upper(a)
     end sweep
     
     proc update
@@ -672,10 +674,9 @@ module game
                 shot(i) := false
             end if
         end for
-            w -> defUpdate
+        w -> defUpdate
         var c := ^level.getNear(^w.pos.x div SPRTSZ, ^w.pos.y div SPRTSZ, ^w.direct)
         for i : 1..3
-            %c(i) -> sDraw(i)
             if checkColl_tile(w, c(i)) then
                 if objectclass(c(i)) >= door then
                     if c(i) -> canEnter then
@@ -685,7 +686,7 @@ module game
                 end if
             end if
         end for
-            for i : 1..upper(m)
+        for i : 1..upper(m)
             if m(i) -> isAlive then
                 m(i) -> defUpdate
                 var tmp := checkColl(m(i), w)
@@ -694,15 +695,14 @@ module game
                         var temp := checkColl(m(i), m(j))
                     end if
                 end for
-                    var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ, ^(m(i)).direct)
+                var a := ^level.getNear(^(m(i)).pos.x div SPRTSZ, ^(m(i)).pos.y div SPRTSZ, ^(m(i)).direct)
                 for j : 1..3
                     if checkColl_tile(m(i), a(j)) then
-                        
                     end if
                 end for
             end if
         end for
-            if Time.Elapsed - timer > 1000 then
+        if Time.Elapsed - timer > 1000 then
             sweep
             timer := Time.Elapsed
         end if
@@ -729,9 +729,7 @@ end pausescreen
 % Game Procedure%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc gamerun
-    
-    game.initialize("C3") 
-    
+    game.initialize("C3")
     loop
         Input.KeyDown (keys)
         game.update
@@ -770,7 +768,6 @@ end clickCheck
 % Procedure for entering high score name %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 proc letterEnter
-    
     var s := 1
     s := Window.Open ("graphics:450;400")
     drawfillbox(0, 0, 1000, 1000, black)
@@ -863,7 +860,6 @@ end controls
 
 proc scoresort
     var temp : int
-    
     for i : 1 .. 10
         for decreasing j : 10 .. 2
             if scores(j).scor > scores(j - 1).scor then
