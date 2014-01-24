@@ -13,7 +13,7 @@ var * score : int := 9999
 var step : int := 0
 var * wonTheGame, lose := false
 var * keys : array char of boolean
-var * ccc : array 1..4 of boolean := init(false, false, false, false)
+var * ccc : array 1..4 of boolean := init(true, true, true, true)
 var * text := Font.New ("Serif:14")
 var * title := Font.New ("Serif:48:Bold")
 var * smaller := Font.New ("Impact:14")
@@ -135,8 +135,9 @@ end object
 
 class * moveable
     inherit object
-    export defUpdate, defCollide, move, var isAlive, var direct
+    export defUpdate, defCollide, move, canHit, var isAlive, var direct
     solid := true
+    var canHit : boolean
     var step := 0    
     var speed := 0
     var direct : 1..4 := 1
@@ -356,11 +357,11 @@ end wall
 
 class * goblin
     inherit moveable
-    
     kind := mode.enemy
     health := 1.0
     speed := 2
     damage := 0.5
+    pic := gobMove(1)(1)
     var t := w
     var mana : real := 10
     
@@ -384,10 +385,9 @@ end goblin
 
 class * boss
     inherit goblin
-    export canHit
     health := 100.0
     speed := 1
-    var canHit := false
+    canHit := false
     
     body proc update
         if ~canHit and step = 100 then
@@ -486,6 +486,7 @@ module game
     export all
     
     var timer := 0
+    var spawned := false
     var shot : array 1..4 of boolean := init(false, false, false, false)
     var arrowKeys : array 1..4 of char := init(KEY_UP_ARROW, KEY_RIGHT_ARROW, KEY_DOWN_ARROW, KEY_LEFT_ARROW)
     var m : flexible array 1..0 of ^moveable
@@ -514,6 +515,7 @@ module game
         drawfillbox (0, 0, maxx, maxy, black)
         Font.Draw ("Game Over", 300, 350, title, white)
         View.Update
+        delay(1000)
     end gameover
     
     proc victory
@@ -700,6 +702,17 @@ module game
                     if checkColl_tile(m(i), a(j)) then
                     end if
                 end for
+                if objectclass(m(i)) = boss then
+                    if m(i) -> canHit then
+                        if ~spawned then
+                            spawnGoblin(m(i) -> pos)
+                            m(upper(m)) -> move(Rand.Int(1,4), 50)
+                            spawned := true
+                        end if
+                    elsif spawned then
+                        spawned := false
+                    end if
+                end if
             end if
         end for
         if Time.Elapsed - timer > 1000 then
