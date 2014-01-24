@@ -705,7 +705,7 @@ module game
                     if objectclass(m(i)) = boss then
                     if m(i) -> canHit then
                         if ~spawned then
-                            for i : 1 .. 2
+                            for e : 1 .. 2
                                 spawnGoblin(m(i) -> pos)
                                 m(upper(m)) -> move(Rand.Int(1,4), 50)
                             end for
